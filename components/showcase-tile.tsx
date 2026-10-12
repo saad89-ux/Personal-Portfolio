@@ -34,6 +34,7 @@ const ShowcaseTile = forwardRef<HTMLAnchorElement, Props>(function ShowcaseTile(
   >
     <span className="tile-cover" aria-hidden="true">
       <img src={card.coverImage ?? card.image} alt="" draggable="false" loading={index < 3 ? "eager" : "lazy"} />
+      <span className="cover-mark">{card.coverMark}</span>
       <span className="cover-name">{card.title}</span>
     </span>
     <span className="tile-halo" aria-hidden="true"><img src={card.image} alt="" draggable="false" loading={index < 3 ? "eager" : "lazy"} /></span>

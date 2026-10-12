@@ -164,9 +164,9 @@ export default function BrandDetail({ brand, allBrands }: Props) {
   return <main className="brand-page" style={{ "--brand-wash": brand.washColor } as CSSProperties}>
     <header className="showcase-header">
       <div className="header-left"><Link className="site-wordmark" href="/work">S&amp;K</Link><Link className="back-to-work" href="/work">← ALL WORK</Link></div>
-      <nav className="header-nav" aria-label="Main navigation"><a href="mailto:hello@produx.studio">[ CONTACT ]</a><button type="button" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>[ MENU ]</button></nav>
+      <nav className="header-nav" aria-label="Main navigation"><Link href="/about">[ ABOUT ]</Link><button type="button" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>[ MENU ]</button></nav>
     </header>
-    {menuOpen && <nav className="menu-panel" aria-label="Site menu"><Link href="/">Home ↗</Link><Link href="/work">Selected work ↗</Link><a href="mailto:hello@produx.studio">Contact ↗</a></nav>}
+    {menuOpen && <nav className="menu-panel" aria-label="Site menu"><Link href="/">Home ↗</Link><Link href="/work">Selected work ↗</Link><Link href="/about">About ↗</Link></nav>}
 
     <section className="brand-intro" data-brand-reveal>
       <div className="brand-intro-copy">

@@ -112,6 +112,7 @@ export default function AssemblyHero() {
     <section className="hero" id="hero" ref={heroRef} aria-label="S&K creative studio">
       <div className="tiles" ref={tilesRef} aria-hidden="true" />
       <div className="hero-wordmark" ref={logoRef} aria-label="S&K">S&K</div>
+      <Link className="hero-about" href="/about">ABOUT ↗</Link>
       <div className="hero-intro-mask">
         <div className="hero-intro" ref={introRef}>
           <div className="hero-intro-content">

@@ -24,6 +24,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
   const filterTweens = useRef(new Map<HTMLElement, gsap.core.Tween>());
   const suppressClick = useRef(false);
   const introRunningRef = useRef(false);
+  const introConsumedRef = useRef(false);
   const introTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const [mode, setMode] = useState<Mode>("vertical");
   const [active, setActive] = useState(0);
@@ -57,8 +58,8 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
     if (!stage || !showcaseCards.length) return;
     const tiles = Array.from(stage.querySelectorAll<HTMLElement>("[data-showcase-tile]"));
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const shouldIntro = !detail && showcaseCards.length > 1 && !reduceMotion;
-    const intro = shouldIntro ? { visible: 0, open: 0, cards: showcaseCards.map(() => ({ progress: 0 })) } : null;
+    const shouldIntro = !detail && showcaseCards.length > 1 && !reduceMotion && !introConsumedRef.current;
+    const intro = shouldIntro ? { visible: 0, open: 0, unfurl: 0, land: 0 } : null;
     let introFinished = false;
     introRunningRef.current = shouldIntro;
     if (shouldIntro) {
@@ -118,59 +119,42 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         const measuredWidth = String(Math.round(tileWidth * 100) / 100);
         const measuredHeight = String(Math.round(tileHeight * 100) / 100);
         if (intro && !introFinished) {
-          const cardProgress = intro.cards[index].progress;
-          const squareSide = tileWidth * .7;
-          const stackWidth = tileWidth * .5 * (1 - intro.open) + squareSide * intro.open;
-          const stackHeight = tileHeight * .5 * (1 - intro.open) + squareSide * intro.open;
-          const layerOffset = 2 + squareSide * .075 * intro.open;
-          const stackX = width * .5 - index * layerOffset;
-          const stackY = height * .55 - index * layerOffset;
-          const startU = showcaseCards.length === 1 ? .5 : .12 + index / (showcaseCards.length - 1) * .76;
           const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
           const smooth = (value: number) => { const t = clamp01(value); return t * t * (3 - 2 * t); };
+          const squareSide = Math.min(width * (mobile ? .7 * .78 : .2), tileWidth * .7);
+          const deckWidth = width * (mobile ? .78 : .2);
+          const deckHeight = deckWidth * 9 / 16;
+          const layerOffset = deckWidth * .07 * intro.open;
+          const stackX = width * .5 - index * layerOffset;
+          const stackY = height * .61 - index * layerOffset;
           const pathPoint = (u: number) => {
             const t = clamp01(u);
-            const px = width * (.15 + .7 * t);
-            const py = height * (.5 + .1 * (t - .5) + .09 * Math.sin(2 * Math.PI * t));
-            const slope = height * (.1 + .18 * Math.PI * Math.cos(2 * Math.PI * t)) / (width * .7);
-            const angle = Math.max(-14, Math.min(14, Math.atan(slope) * 180 / Math.PI));
-            return { x: px, y: py, angle };
+            const px = width * (mobile ? .05 + .9 * t : .04 + .92 * t);
+            const py = height * (.52 + .14 * Math.sin(2 * Math.PI * t));
+            const slope = height * .28 * Math.PI * Math.cos(2 * Math.PI * t) / (width * (mobile ? .9 : .92));
+            return { x: px, y: py, angle: Math.max(-14, Math.min(14, Math.atan(slope) * 180 / Math.PI)) };
           };
-          let centerX = stackX;
-          let centerY = stackY;
-          let poseWidth = stackWidth;
-          let poseHeight = stackHeight;
-          let poseScale = 1;
-          let poseOpacity = intro.visible;
-          let rotation = 0;
-          let poseZ = 2000 - index;
-
-          if (cardProgress > 0) {
-            const enter = smooth(cardProgress / .18);
-            const flow = smooth((cardProgress - .18) / .54);
-            const land = smooth((cardProgress - .72) / .28);
-            const start = pathPoint(startU);
-            const end = pathPoint(Math.min(.98, startU + .17));
-            const moving = pathPoint(startU + .17 * flow);
-            const pathX = cardProgress < .18 ? start.x : moving.x;
-            const pathY = cardProgress < .18 ? start.y : moving.y;
-            const pathAngle = cardProgress < .18 ? start.angle : moving.angle;
-
-            centerX = stackX + (pathX - stackX) * enter;
-            centerY = stackY + (pathY - stackY) * enter;
-            rotation = pathAngle * enter;
-            if (cardProgress >= .18 && cardProgress < .72) { centerX = moving.x; centerY = moving.y; rotation = moving.angle; }
-            if (cardProgress >= .72) {
-              centerX = end.x + (x - end.x) * land;
-              centerY = end.y + (y - end.y) * land;
-              rotation = end.angle * (1 - land);
-            }
-            poseWidth = squareSide + (tileWidth - squareSide) * land;
-            poseHeight = squareSide + (tileHeight - squareSide) * land;
-            poseScale = 1 + (scale - 1) * land;
-            poseOpacity = intro.visible * (1 + (opacity - 1) * land);
-            poseZ = Math.round((2000 - index) * (1 - land) + (1000 - Math.round(distance * 10)) * land);
-          }
+          const stackW = deckWidth + (squareSide - deckWidth) * intro.open;
+          const stackH = deckHeight + (squareSide - deckHeight) * intro.open;
+          const release = smooth((intro.unfurl - index * .055) / .48);
+          const pathU = showcaseCards.length <= 1 ? .5 : .08 + index / (showcaseCards.length - 1) * .84;
+          const path = pathPoint(pathU);
+          const chainX = stackX + (path.x - stackX) * release;
+          const chainY = stackY + (path.y - stackY) * release;
+          const cardLand = smooth((intro.land - Math.max(0, (showcaseCards.length - 1 - index) * .065)) / .72);
+          const centerX = chainX + (x - chainX) * cardLand;
+          const centerY = chainY + (y - chainY) * cardLand;
+          const flightWidth = stackW + (squareSide - stackW) * release;
+          const flightHeight = stackH + (squareSide - stackH) * release;
+          const poseWidth = flightWidth + (tileWidth - flightWidth) * cardLand;
+          const poseHeight = flightHeight + (tileHeight - flightHeight) * cardLand;
+          const rotation = path.angle * release * (1 - cardLand);
+          const poseScale = 1 + (scale - 1) * cardLand;
+          const poseOpacity = intro.visible * (1 + (opacity - 1) * cardLand);
+          const deckZ = 3000 - index * 20;
+          const chainZ = 2000 + index * 20;
+          const settledZ = 1000 - Math.round(distance * 10);
+          const poseZ = Math.round((deckZ + (chainZ - deckZ) * release) * (1 - cardLand) + settledZ * cardLand);
 
           const poseMeasuredWidth = String(Math.round(poseWidth * 100) / 100);
           const poseMeasuredHeight = String(Math.round(poseHeight * 100) / 100);
@@ -202,6 +186,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
     if (intro) {
       const timeline = gsap.timeline({ onUpdate: render, onComplete: () => {
         introFinished = true;
+        introConsumedRef.current = true;
         render();
         introRunningRef.current = false;
         delete stage.dataset.intro;
@@ -212,11 +197,10 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         }, 150);
       } });
       introTimelineRef.current = timeline;
-      timeline.to(intro, { visible: 1, duration: .5, ease: "power3.out" }, .1);
-      timeline.to(intro, { open: 1, duration: .5, ease: "power3.out" }, .6);
-      showcaseCards.forEach((_, index) => {
-        timeline.to(intro.cards[index], { progress: 1, duration: 2 - index * .08, ease: "power2.inOut" }, 1.7 + index * .08);
-      });
+      timeline.to(intro, { visible: 1, duration: .25, ease: "power3.out" }, .1);
+      timeline.to(intro, { open: 1, duration: .4, ease: "expo.out" }, .5);
+      timeline.to(intro, { unfurl: 1, duration: .9, ease: "power2.inOut" }, 1.7);
+      timeline.to(intro, { land: 1, duration: 1.25, ease: "power2.inOut" }, 2.6);
     }
     const settle = () => {
       if (introRunningRef.current) return;
@@ -352,9 +336,9 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       {showcaseCards[0] && <link rel="preload" as="image" href={showcaseCards[0].image} />}
       <header className="showcase-header">
         <div className="header-left">{backHref ? <Link className="site-wordmark" href="/work">S&K</Link> : <Link className="site-wordmark" href="/">S&K</Link>}{backHref && <Link className="back-to-work" href={backHref}>← ALL WORK</Link>}</div>
-        <nav className="header-nav" aria-label="Main navigation"><a href="mailto:hello@produx.studio">[ CONTACT ]</a><button type="button" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>[ MENU ]</button></nav>
+        <nav className="header-nav" aria-label="Main navigation"><Link href="/about">[ ABOUT ]</Link><button type="button" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>[ MENU ]</button></nav>
       </header>
-      {menuOpen && <nav className="menu-panel" aria-label="Site menu"><Link href="/">Home ↗</Link><Link href="/work">Selected work ↗</Link><a href="mailto:hello@produx.studio">Contact ↗</a></nav>}
+      {menuOpen && <nav className="menu-panel" aria-label="Site menu"><Link href="/">Home ↗</Link><Link href="/work">Selected work ↗</Link><Link href="/about">About ↗</Link></nav>}
       <div className="showcase-stage" aria-label={`${pageTitle} showcase`}>
       {showcaseCards.map((card, index) => <ShowcaseTile key={card.id} card={card} index={index} onSelect={handleTileClick} onItemClick={detail ? selectItem : undefined} />)}
       </div>

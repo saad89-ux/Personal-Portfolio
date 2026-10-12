@@ -8,6 +8,7 @@ export type ShowcaseCard = {
   title: string;
   category: string;
   image: string;
+  coverImage?: string;
   coverColor: string;
   coverMark: string;
   aspect?: string;
@@ -31,7 +32,10 @@ const ShowcaseTile = forwardRef<HTMLAnchorElement, Props>(function ShowcaseTile(
       else onSelect?.(index);
     }}
   >
-    <span className="tile-cover"><span className="cover-mark" aria-hidden="true">{card.coverMark}</span><span className="cover-name">{card.title}</span></span>
+    <span className="tile-cover" aria-hidden="true">
+      <img src={card.coverImage ?? card.image} alt="" draggable="false" loading={index < 3 ? "eager" : "lazy"} />
+      <span className="cover-name">{card.title}</span>
+    </span>
     <span className="tile-halo" aria-hidden="true"><img src={card.image} alt="" draggable="false" loading={index < 3 ? "eager" : "lazy"} /></span>
     <span className="tile-image" aria-hidden="true"><img src={card.image} alt="" draggable="false" loading={index < 3 ? "eager" : "lazy"} /></span>
     <svg className="tile-filter" width="1" height="1" viewBox="0 0 1 1" aria-hidden="true" focusable="false"><filter id={`roughen-${card.id}`} x="-35%" y="-35%" width="170%" height="170%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed={index + 3} result="noise" /><feDisplacementMap data-displace in="SourceGraphic" in2="noise" scale="32" xChannelSelector="R" yChannelSelector="G" /></filter></svg>

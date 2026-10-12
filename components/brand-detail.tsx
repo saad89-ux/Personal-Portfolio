@@ -39,6 +39,31 @@ function renderBlock(block: BrandBlock, index: number, imageIndex: Map<string, n
     </div>
   </div>;
 
+  if (block.kind === "film-collection") return <section className="brand-film-grid" aria-label="Film and motion projects" key={`film-collection-${index}`}>
+    {block.films.map((film, filmIndex) => <article className="brand-film-card" data-brand-reveal key={film.media.id}>
+      <div className="brand-film-frame" style={{ "--tile-bg": film.media.bg ?? "#111216", "--tile-aspect": film.media.aspect ?? "9 / 16" } as CSSProperties}>
+        <BrandVideo media={film.media} />
+      </div>
+      <div className="brand-film-caption">
+        <span className="brand-film-number">FILM {String(filmIndex + 1).padStart(2, "0")} / {String(block.films.length).padStart(2, "0")}</span>
+        <h2>{film.heading}</h2>
+        <p>{film.paragraph}</p>
+      </div>
+    </article>)}
+  </section>;
+
+  if (block.kind === "social-posts") return <section className="brand-social-grid" aria-label="Social media post designs" key={`social-posts-${index}`}>
+    {block.posts.map((post, postIndex) => <article className="brand-social-card" data-brand-reveal key={post.media.id}>
+      <ImageTile media={post.media} onOpen={() => openImage(imageIndex.get(post.media.id) ?? 0)} />
+      <div className="brand-social-caption">
+        <span className="brand-film-number">{post.brand.toUpperCase()} · {String(postIndex + 1).padStart(2, "0")} / {String(block.posts.length).padStart(2, "0")}</span>
+        <h2>{post.heading}</h2>
+        <p>{post.paragraph}</p>
+        {post.source && <a href={post.source.href} target="_blank" rel="noreferrer">{post.source.label}</a>}
+      </div>
+    </article>)}
+  </section>;
+
   return <div className="brand-media-grid" key={`full-${index}`}>
     <ImageTile media={block.media} onOpen={() => openImage(imageIndex.get(block.media.id) ?? 0)} />
   </div>;
@@ -46,6 +71,7 @@ function renderBlock(block: BrandBlock, index: number, imageIndex: Map<string, n
 
 function BrandVideo({ media }: { media: BrandMedia }) {
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -63,14 +89,28 @@ function BrandVideo({ media }: { media: BrandMedia }) {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) void video.play().catch(() => undefined);
       else video.pause();
-    }, { threshold: .2 });
+    }, { threshold: .12 });
     observer.observe(video);
     return () => { observer.disconnect(); video.pause(); };
   }, [reducedMotion]);
 
-  return <video ref={videoRef} aria-label={media.title} autoPlay={!reducedMotion} muted loop playsInline preload="metadata" poster={media.poster}>
-    <source src={media.src} type="video/mp4" />
-  </video>;
+  const toggleSound = () => {
+    const nextMuted = !muted;
+    setMuted(nextMuted);
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = nextMuted;
+    if (!nextMuted) void video.play().catch(() => undefined);
+  };
+
+  return <div className="brand-video-player">
+    <video ref={videoRef} aria-label={media.title} muted={muted} loop playsInline preload="none" poster={media.poster}>
+      <source src={media.src} type="video/mp4" />
+    </video>
+    <button className="brand-video-sound" type="button" aria-pressed={!muted} aria-label={muted ? `Turn sound on for ${media.title}` : `Mute ${media.title}`} onClick={toggleSound}>
+      <span aria-hidden="true">{muted ? "♪×" : "♪"}</span>{muted ? "SOUND OFF" : "SOUND ON"}
+    </button>
+  </div>;
 }
 
 export default function BrandDetail({ brand, allBrands }: Props) {
@@ -79,7 +119,8 @@ export default function BrandDetail({ brand, allBrands }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const imageItems = useMemo<PortfolioItem[]>(() => brand.blocks.flatMap((block) => {
-    const media = block.kind === "full" || block.kind === "pair" ? (block.kind === "pair" ? block.media : [block.media]) : [];
+    const media = block.kind === "full" || block.kind === "pair" ? (block.kind === "pair" ? block.media : [block.media])
+      : block.kind === "social-posts" ? block.posts.map((post) => post.media) : [];
     return media.filter((item) => item.type === "image").map((item) => ({
       id: item.id, title: item.title, image: item.src, coverColor: item.bg ?? brand.coverColor, aspect: item.aspect,
     }));
@@ -136,7 +177,7 @@ export default function BrandDetail({ brand, allBrands }: Props) {
     </section>
 
     <div className="brand-hero" data-brand-reveal>
-      <img ref={heroRef} src={brand.heroImage} alt={`${brand.title} brand identity`} fetchPriority="high" />
+      <img ref={heroRef} src={brand.heroImage} alt={`${brand.title} ${brand.category.toLowerCase()} cover`} fetchPriority="high" />
     </div>
 
     <div className="brand-content">
@@ -144,8 +185,8 @@ export default function BrandDetail({ brand, allBrands }: Props) {
       <section className="brand-more" data-brand-reveal>
         <h2>See more projects</h2>
         <div className="brand-more-grid">{otherBrands.map((project) => <Link className="brand-more-card" href={project.href} key={project.slug}>
-          <span className="brand-more-image" style={{ "--tile-bg": project.coverColor } as CSSProperties}><img src={project.heroImage} alt={`${project.title} brand identity`} loading="lazy" /></span>
-          <span className="brand-more-meta"><span>{project.title}</span><span>BRAND IDENTITY</span></span>
+          <span className="brand-more-image" style={{ "--tile-bg": project.coverColor } as CSSProperties}><img src={project.coverImage ?? project.heroImage} alt={`${project.title} ${project.category.toLowerCase()}`} loading="lazy" /></span>
+          <span className="brand-more-meta"><span>{project.title}</span><span>{project.category.toUpperCase()}</span></span>
         </Link>)}</div>
       </section>
     </div>

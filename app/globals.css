@@ -26,7 +26,7 @@ body { background: var(--bg); color: var(--fg); font-family: "IBM Plex Mono", ui
 .showcase-header { position: absolute; z-index: 10; top: 34px; left: 5vw; right: 5vw; display: flex; align-items: center; justify-content: space-between; font-size: 10px; letter-spacing: .1em; }
 .header-left, .header-nav { display: flex; align-items: center; gap: 38px; }.header-nav { gap: 23px; }.site-wordmark { color: #f4f4ef; font: 500 22px/1 Arial, sans-serif; letter-spacing: -.11em; text-decoration: none; }.site-wordmark span { margin-left: 4px; font: 9px/1 monospace; vertical-align: top; letter-spacing: 0; }.back-to-work, .header-nav a, .header-nav button { border: 0; background: transparent; color: rgba(244,244,239,.7); text-decoration: none; font: inherit; letter-spacing: inherit; cursor: pointer; transition: color .25s ease; }.back-to-work { font-size: 9px; }.header-nav a:hover, .header-nav button:hover, .back-to-work:hover { color: #c6ff3a; }
 .menu-panel { position: absolute; z-index: 20; top: 76px; right: 5vw; display: grid; gap: 14px; min-width: 190px; padding: 20px; background: rgba(18,18,17,.94); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(16px); }.menu-panel a { color: #f4f4ef; font-size: 11px; text-decoration: none; }.menu-panel a:hover { color: #c6ff3a; }
-.showcase-stage { position: absolute; inset: 0; overflow: hidden; }.showcase-tile { position: absolute; display: block; overflow: hidden; aspect-ratio: var(--aspect, 16 / 9); background: var(--cover); color: #111; text-decoration: none; transform-origin: center; contain: layout paint; will-change: transform, opacity; cursor: pointer; outline: 0; }.showcase-tile:focus-visible { outline: 1px solid #c6ff3a; outline-offset: 5px; }.tile-cover, .tile-image, .tile-halo { position: absolute; inset: 0; display: block; }.tile-cover { z-index: 3; display: grid; place-items: center; background: var(--cover); color: #111; will-change: opacity, filter, transform; }.cover-mark { font: 300 clamp(42px, 7vw, 112px)/1 Arial, sans-serif; }.cover-name { position: absolute; left: 18px; bottom: 15px; max-width: calc(100% - 36px); overflow: hidden; color: rgba(0,0,0,.62); font-size: 8px; letter-spacing: .12em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }.tile-image, .tile-halo { --reveal: 0%; --blur: 10px; --zoom: 1.15; z-index: 2; overflow: hidden; transform: scale(var(--zoom)); filter: blur(var(--blur)); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--reveal) - 8%), transparent var(--reveal)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--reveal) - 8%), transparent var(--reveal)); will-change: transform, opacity, filter, -webkit-mask-image; }.tile-halo { --reveal: 0%; z-index: 1; opacity: 0; transform: scale(1.06); filter: blur(32px) saturate(1.5); mix-blend-mode: screen; }.tile-image img, .tile-halo img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }.tile-image { filter: var(--roughen) blur(var(--blur)); }.tile-filter { position: absolute; left: -2px; top: -2px; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+.showcase-stage { position: absolute; inset: 0; overflow: hidden; }.showcase-tile { position: absolute; display: block; overflow: hidden; aspect-ratio: var(--aspect, 16 / 9); background: var(--cover); color: #111; text-decoration: none; transform-origin: center; contain: layout paint; will-change: transform, opacity; cursor: pointer; outline: 0; }.showcase-tile:focus-visible { outline: 1px solid #c6ff3a; outline-offset: 5px; }.tile-cover, .tile-image, .tile-halo { position: absolute; inset: 0; display: block; }.tile-cover { z-index: 3; overflow: hidden; background: var(--cover); color: #fff; will-change: opacity, filter, transform; }.tile-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }.tile-cover::after { position: absolute; inset: 35% 0 0; content: ""; background: linear-gradient(transparent, rgba(0,0,0,.62)); pointer-events: none; }.cover-mark { font: 300 clamp(42px, 7vw, 112px)/1 Arial, sans-serif; }.cover-name { position: absolute; z-index: 1; left: 18px; bottom: 15px; max-width: calc(100% - 36px); overflow: hidden; color: rgba(255,255,255,.92); font-size: 8px; letter-spacing: .12em; text-shadow: 0 1px 8px rgba(0,0,0,.5); text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }.tile-image, .tile-halo { --reveal: 0%; --blur: 10px; --zoom: 1.15; z-index: 2; overflow: hidden; transform: scale(var(--zoom)); filter: blur(var(--blur)); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--reveal) - 8%), transparent var(--reveal)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--reveal) - 8%), transparent var(--reveal)); will-change: transform, opacity, filter, -webkit-mask-image; }.tile-halo { --reveal: 0%; z-index: 1; opacity: 0; transform: scale(1.06); filter: blur(32px) saturate(1.5); mix-blend-mode: screen; }.tile-image img, .tile-halo img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }.tile-image { filter: var(--roughen) blur(var(--blur)); }.tile-filter { position: absolute; left: -2px; top: -2px; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
 .showcase-label { position: absolute; z-index: 8; top: 50%; left: 13vw; display: flex; flex-direction: column; gap: 7px; max-width: 310px; transform: translateY(-50%); pointer-events: none; animation: label-in .32s both; }.label-index { position: absolute; right: calc(100% + 20px); top: 1px; color: #7f7f7a; font-size: 9px; letter-spacing: .1em; }.label-category { color: rgba(244,244,239,.48); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }.label-title { color: #f4f4ef; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; letter-spacing: -.025em; }.is-detail .showcase-label { max-width: min(370px, 32vw); }.is-detail .label-title { font-size: clamp(16px, 1.2vw, 22px); }
 @keyframes label-in { from { opacity: 0; transform: translate3d(0,8px,0) translateY(-50%); } to { opacity: 1; transform: translate3d(0,0,0) translateY(-50%); } }
 .full-view { position: absolute; z-index: 8; bottom: 38px; left: 5vw; display: grid; gap: 7px; color: rgba(244,244,239,.62); font-size: 8px; letter-spacing: .12em; text-decoration: none; transition: color .2s; }.full-view:hover { color: #c6ff3a; }.full-view span + span { color: #555550; font-size: 7px; }
@@ -114,6 +114,30 @@ body { background: var(--bg); color: var(--fg); font-family: "IBM Plex Mono", ui
 .brand-media-tile:focus-visible { outline: 1px solid #c6ff3a; outline-offset: 4px; }
 .brand-video-tile { cursor: default; }
 .brand-video-tile video { position: absolute; inset: 0; }
+.brand-video-player { position: absolute; inset: 0; }
+.brand-video-player video { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--tile-bg, #111); }
+.brand-video-sound { position: absolute; z-index: 2; top: 12px; right: 12px; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 10px; border: 1px solid rgba(255,255,255,.34); background: rgba(8,9,12,.72); color: #fff; font: 8px/1 "IBM Plex Mono", monospace; letter-spacing: .1em; cursor: pointer; backdrop-filter: blur(10px); transition: color .2s, background .2s, border-color .2s; }
+.brand-video-sound span { font: 14px/1 Arial, sans-serif; }
+.brand-video-sound:hover, .brand-video-sound:focus-visible { border-color: #c6ff3a; background: #c6ff3a; color: #10110c; }
+.brand-video-sound:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.brand-film-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 64px 14px; margin: 10vh 0 14vh; }
+.brand-film-card { min-width: 0; }
+.brand-film-frame { position: relative; width: 100%; aspect-ratio: var(--tile-aspect, 9 / 16); overflow: hidden; background: var(--tile-bg, #111216); }
+.brand-film-caption { padding: 15px 2px 0; }
+.brand-film-number { color: #c6ff3a; font: 8px/1.5 "IBM Plex Mono", monospace; letter-spacing: .12em; }
+.brand-film-caption h2 { margin-top: 9px; color: #f4f4ef; font: 400 clamp(18px, 1.35vw, 24px)/1.15 Arial, sans-serif; letter-spacing: -.025em; }
+.brand-film-caption p { max-width: 390px; margin-top: 11px; color: rgba(244,244,239,.64); font-size: 11px; line-height: 1.7; }
+.brand-social-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 58px 18px; margin: 10vh 0 14vh; }
+.brand-social-card { min-width: 0; }
+.brand-social-card .brand-media-tile { background: var(--tile-bg); }
+.brand-social-card .brand-media-tile img { object-fit: contain; }
+.brand-social-caption { padding: 15px 2px 0; }
+.brand-social-caption .brand-film-number { display: block; color: rgba(244,244,239,.48); font-size: 7px; line-height: 1.6; }
+.brand-social-caption h2 { margin-top: 9px; color: #f4f4ef; font: 400 clamp(17px, 1.25vw, 22px)/1.2 Arial, sans-serif; letter-spacing: -.025em; }
+.brand-social-caption p { margin-top: 10px; color: rgba(244,244,239,.64); font-size: 11px; line-height: 1.7; }
+.brand-social-caption a { display: inline-block; margin-top: 13px; color: #c6ff3a; font: 8px/1.4 "IBM Plex Mono", monospace; letter-spacing: .1em; text-decoration: none; }
+.brand-social-caption a:hover, .brand-social-caption a:focus-visible { color: #fff; }
+@media (max-width: 1000px) { .brand-film-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .brand-more { margin-top: 18vh; }
 .brand-more h2 { margin-bottom: 30px; }
 .brand-more-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -142,10 +166,17 @@ body { background: var(--bg); color: var(--fg); font-family: "IBM Plex Mono", ui
   .brand-text-block h2, .brand-more h2 { font-size: 26px; }
   .brand-text-copy { max-width: none; margin-top: 18px; font-size: 11px; }
   .brand-media-grid.is-pair { grid-template-columns: 1fr; }
+  .brand-film-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 12px; margin: 8vh 0 10vh; }
+  .brand-social-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 38px 12px; margin: 8vh 0 10vh; }
+  .brand-film-caption h2 { font-size: 19px; }
+  .brand-film-caption p { font-size: 10px; }
+  .brand-social-caption h2 { font-size: 17px; }
+  .brand-social-caption p { font-size: 10px; }
   .brand-more { margin-top: 12vh; }
   .brand-more-grid { grid-template-columns: 1fr; gap: 24px; }
   .brand-more-meta { font-size: 8px; }
 }
+@media (max-width: 430px) { .brand-social-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .brand-media-tile img, .brand-more-image img { transition: none; } }
 
 

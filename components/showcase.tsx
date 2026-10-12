@@ -30,7 +30,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
 
   const showcaseCards: ShowcaseCard[] = useMemo(() => detail
     ? (detailItems ?? []).map((item) => ({ id: item.id, title: item.title, category: pageTitle, image: item.image, coverColor: item.coverColor, coverMark: "✳", aspect: item.aspect, item }))
-    : cards.map((card) => ({ id: card.slug, title: card.title, category: card.category, image: card.heroImage, coverColor: card.coverColor, coverMark: card.coverMark, href: card.href })), [cards, detail, detailItems, pageTitle]);
+    : cards.map((card) => ({ id: card.slug, title: card.title, category: card.category, image: card.heroImage, coverImage: card.coverImage ?? card.heroImage, coverColor: card.coverColor, coverMark: card.coverMark, href: card.href })), [cards, detail, detailItems, pageTitle]);
   const itemList = detailItems ?? [];
 
   const animateReveal = useCallback((tile: HTMLElement, reveal: boolean) => {

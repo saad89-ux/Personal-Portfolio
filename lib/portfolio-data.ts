@@ -13,6 +13,7 @@ export type PortfolioCollection = {
   coverColor: string;
   coverMark: string;
   heroImage: string;
+  coverImage?: string;
   items: PortfolioItem[];
   href: string;
 };
@@ -31,10 +32,12 @@ export type BrandBlock =
   | { kind: "text"; heading: string; paragraphs: string[] }
   | { kind: "full"; media: BrandMedia }
   | { kind: "pair"; media: [BrandMedia, BrandMedia]; aspect?: string }
-  | { kind: "video"; media: BrandMedia };
+  | { kind: "video"; media: BrandMedia }
+  | { kind: "film-collection"; films: { media: BrandMedia; heading: string; paragraph: string }[] }
+  | { kind: "social-posts"; posts: { media: BrandMedia; brand: string; heading: string; paragraph: string; source?: { label: string; href: string } }[] };
 
-export type Brand = PortfolioCollection & {
-  category: "Brand Identity";
+export type Brand = Omit<PortfolioCollection, "category"> & {
+  category: string;
   tagline: string;
   services: string[];
   year: string;
@@ -112,7 +115,7 @@ const sophiaMedia = (item: PortfolioItem): BrandMedia => ({ id: item.id, title: 
 
 const sophia: Brand = {
   slug: "sophia", title: "Sophia", category: "Brand Identity", coverColor: "#1c3028", coverMark: "S",
-  heroImage: "/mock/sophia-hero.jpg", href: "/work/brand-identity/sophia", items: sophiaItems,
+  heroImage: "/mock/sophia-hero.jpg", coverImage: "/work-covers/sophia-cover.webp", href: "/work/brand-identity/sophia", items: sophiaItems,
   tagline: "A premium, purpose-built rental community in downtown Barrie, designed for modern urban living and everyday connection.",
   services: ["Brand Strategy", "Visual Identity", "Residential", "Applications"], year: "2026", washColor: "rgba(28, 48, 40, .48)",
   blocks: [
@@ -129,84 +132,211 @@ const sophia: Brand = {
       "Each application carries the same balance of confidence and warmth into the built environment and resident experience. The system is designed to support clear property communications and recognition across public-facing materials, while the cream and green palette keeps the overall impression calm and dependable.",
     ] },
     { kind: "full", media: sophiaMedia(sophiaItems[5]) },
-    { kind: "video", media: { id: "sophia-film", title: "Sophia brand film", type: "video", src: "/mock/video/sophia.mp4", poster: "/mock/sophia-hero.jpg", bg: "#1c3028", aspect: "16 / 9" } },
     { kind: "full", media: { id: "sophia-closing", title: "Sophia identity", type: "image", src: "/mock/sophia-hero.jpg", bg: "#1c3028", aspect: "16 / 9" } },
   ],
 };
 
-const nteCoffeeItems: PortfolioItem[] = [
-  { id: "nte-coffee-cards", title: "Loyalty card", image: "/mock/nte-card.jpg", coverColor: "#2b1b12", aspect: "864 / 1236" },
-  { id: "nte-coffee-cups", title: "Takeaway cups", image: "/mock/nte-cups.jpg", coverColor: "#d6c3a4", aspect: "921 / 1152" },
-  { id: "nte-coffee-menu", title: "Cafe menu", image: "/mock/nte-menu.jpg", coverColor: "#e9dfcf", aspect: "864 / 1214" },
-  { id: "nte-coffee-cafe", title: "Coffee house", image: "/mock/nte-cafe.jpg", coverColor: "#4b3020", aspect: "735 / 826" },
-  { id: "nte-coffee-barista", title: "Coffee ritual", image: "/mock/nte-barista.jpg", coverColor: "#39251b", aspect: "880 / 1187" },
-  { id: "nte-coffee-story", title: "Good morning story", image: "/mock/nte-story.jpg", coverColor: "#9a6041", aspect: "768 / 1365" },
-  { id: "nte-coffee-social", title: "Social story", image: "/mock/nte-social.jpg", coverColor: "#593522", aspect: "768 / 1376" },
-  { id: "nte-coffee-machine", title: "Coffee machine", image: "/mock/nte-machine.gif", coverColor: "#28180f", aspect: "1400 / 784" },
-  { id: "nte-coffee-menu-in-use", title: "Menu in use", image: "/mock/nte-menu-in-use.gif", coverColor: "#2b1b12", aspect: "1400 / 864" },
-  { id: "nte-coffee-campaign", title: "Coffee campaign", image: "/mock/nte-campaign.jpg", coverColor: "#362318", aspect: "1 / 1" },
-  { id: "nte-coffee-frontage", title: "Cafe frontage", image: "/mock/nte-hero.jpg", coverColor: "#2b1b12", aspect: "1456 / 734" },
+const coffeeBrandItems: PortfolioItem[] = [
+  { id: "me-coffee-identity", title: "Coffee and character identity", image: "/me-coffee/brand-world.png", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-loyalty", title: "Loyalty card", image: "/me-coffee/loyalty-card.jpg", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-cups", title: "Takeaway cups", image: "/me-coffee/takeaway-cups.jpg", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-menu", title: "Menu and coffee cards", image: "/me-coffee/menu-cards.jpg", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-menu-in-use", title: "Menu in use", image: "/me-coffee/menu-in-use.gif", coverColor: "#24150d", aspect: "16 / 10" },
+  { id: "me-coffee-machine", title: "Coffee machine", image: "/me-coffee/coffee-machine.gif", coverColor: "#24150d", aspect: "16 / 9" },
+  { id: "me-coffee-storefront", title: "Coffee house storefront", image: "/me-coffee/hero-storefront.jpg", coverColor: "#24150d", aspect: "2 / 1" },
+  { id: "me-coffee-iced", title: "Iced coffee campaign", image: "/me-coffee/iced-coffee.jpg", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-social", title: "Good morning social story", image: "/me-coffee/coffee-story.jpg", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-barista", title: "Coffee making ritual", image: "/me-coffee/barista-ritual.jpg", coverColor: "#24150d", aspect: "4 / 5" },
+  { id: "me-coffee-story", title: "Social story", image: "/me-coffee/social-story.jpg", coverColor: "#24150d", aspect: "9 / 16" },
+  { id: "me-coffee-thank-you", title: "Thank you card", image: "/me-coffee/thank-you-card.png", coverColor: "#24150d", aspect: "16 / 9" },
+  { id: "me-coffee-character", title: "Animated coffee character", image: "/me-coffee/brand-character.gif", coverColor: "#24150d", aspect: "16 / 9" },
+  { id: "me-coffee-character-study", title: "Character animation", image: "/me-coffee/character-animation.gif", coverColor: "#24150d", aspect: "16 / 9" },
+  { id: "me-coffee-ritual", title: "Coffee ritual campaign", image: "/me-coffee/coffee-ritual.jpg", coverColor: "#24150d", aspect: "4 / 5" },
 ];
 
-const nteCoffeeMedia = (item: PortfolioItem): BrandMedia => ({ id: item.id, title: item.title, type: "image", src: item.image, bg: item.coverColor, aspect: item.aspect });
+const coffeeBrandMedia = (item: PortfolioItem): BrandMedia => ({ id: item.id, title: item.title, type: "image", src: item.image, bg: item.coverColor, aspect: item.aspect });
 
-const nteCoffee: Brand = {
-  slug: "aurora-finance", title: "Nte Coffee House", category: "Brand Identity", coverColor: "#2b1b12", coverMark: "nte",
-  heroImage: "/mock/nte-hero.jpg", href: "/work/brand-identity/aurora-finance", items: nteCoffeeItems,
-  tagline: "A modern coffee house where refined taste meets contemporary British culture.",
-  services: ["Brand Identity Design", "Packaging Design", "Art Direction"], year: "2026", washColor: "rgba(76, 48, 31, .44)",
+const coffeeBrand: Brand = {
+  slug: "me-coffee", title: "me coffee", category: "Brand Identity", coverColor: "#24150d", coverMark: "me",
+  heroImage: "/me-coffee/hero-storefront.jpg", coverImage: "/work-covers/coffee-cover.webp", href: "/work/brand-identity/me-coffee", items: coffeeBrandItems,
+  tagline: "A characterful coffee brand built around good coffee, warm rituals, and a little everyday joy.",
+  services: ["Brand Identity", "Packaging", "Art Direction", "Social Campaign"], year: "2026", washColor: "rgba(83, 48, 24, .42)",
   blocks: [
     { kind: "text", heading: "Art Direction", paragraphs: [
-      "Nte Coffee House is made for a new generation, bringing refined taste together with modern British culture. Rooted in the ritual of great coffee, it turns an everyday stop into an experience that feels sophisticated, expressive, and quietly premium.",
-      "The identity treats coffee as more than a drink: it is a ritual, a lifestyle, and a moment of connection. Minimal design and warm, considered details create an elevated world that still feels welcoming and easy to belong to.",
+      "me is a coffee and pastry brand with a warm, confident visual personality. A distinctive hand-drawn wordmark and illustrated character make the identity immediately recognizable across the café, cups, menus, and social media.",
+      "The art direction pairs close-up coffee imagery with playful graphics and tactile, cream-toned surfaces. Espresso brown anchors the system, letting the expressive mark and rich coffee photography carry the experience from the first cup to the last detail.",
     ] },
-    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[0]), nteCoffeeMedia(nteCoffeeItems[1])], aspect: "4 / 5" },
-    { kind: "text", heading: "Identity", paragraphs: ["A distinctive hand-drawn wordmark leads the system, joined by a playful coffee character and expressive lettering. The combination gives Nte a recognizable voice across loyalty cards, takeaway cups, menus, and the cafe itself."] },
-    { kind: "full", media: nteCoffeeMedia(nteCoffeeItems[2]) },
-    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[3]), nteCoffeeMedia(nteCoffeeItems[4])], aspect: "4 / 5" },
-    { kind: "text", heading: "Colour", paragraphs: ["Soft cream brings warmth and comfort to a deep espresso palette. Together, the tones feel refined and exclusive while keeping the coffee house approachable, carrying the same atmosphere from the first visit to every piece of packaging."] },
-    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[5]), nteCoffeeMedia(nteCoffeeItems[6])], aspect: "9 / 16" },
+    { kind: "pair", media: [coffeeBrandMedia(coffeeBrandItems[0]), coffeeBrandMedia(coffeeBrandItems[1])], aspect: "4 / 5" },
+    { kind: "text", heading: "Identity", paragraphs: ["The soft, hand-drawn wordmark gives me its own easygoing voice. A small coffee character adds a memorable signature, while bold, rounded lettering stays legible across packaging, menus, and the storefront."] },
+    { kind: "pair", media: [coffeeBrandMedia(coffeeBrandItems[2]), coffeeBrandMedia(coffeeBrandItems[3])], aspect: "4 / 5" },
+    { kind: "full", media: coffeeBrandMedia(coffeeBrandItems[4]) },
+    { kind: "text", heading: "Colour & Craft", paragraphs: ["Cream and espresso brown create the core palette: inviting, rich, and rooted in the daily coffee ritual. Warm photography and subtle paper textures keep the visual system tactile, while the white wordmark gives every touchpoint a clear point of contrast."] },
+    { kind: "pair", media: [coffeeBrandMedia(coffeeBrandItems[5]), coffeeBrandMedia(coffeeBrandItems[6])], aspect: "16 / 9" },
     { kind: "text", heading: "Creative Process", paragraphs: [
-      "We built the identity around the small rituals that make a coffee visit memorable: choosing a drink, receiving a cup, and sharing a moment at the counter. A warm palette, expressive type, and illustrated character work together to make these moments feel distinctively Nte.",
-      "The system moves from printed menus and loyalty cards to social storytelling, packaging, and the cafe frontage. Each application keeps the same balance of elevated aesthetics and everyday ease, making the brand feel consistent without losing its personality.",
+      "We shaped the identity around the moments that make a coffee stop feel personal: a familiar cup, a favorite order, and a friendly face behind the counter. The character and expressive wordmark add personality without getting in the way of the product.",
+      "The visual system carries naturally across the menu, loyalty card, takeaway cups, coffee machine, storefront, and social stories. Consistent colour and illustration keep each application connected while giving the photography room to feel immediate and inviting.",
     ] },
-    { kind: "full", media: nteCoffeeMedia(nteCoffeeItems[8]) },
-    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[7]), nteCoffeeMedia(nteCoffeeItems[10])], aspect: "16 / 9" },
-    { kind: "video", media: { id: "nte-coffee-film", title: "Nte Coffee House film", type: "video", src: "/mock/video/aurora-finance.mp4", poster: "/mock/nte-hero.jpg", bg: "#2b1b12", aspect: "16 / 9" } },
-    { kind: "full", media: nteCoffeeMedia(nteCoffeeItems[9]) },
+    { kind: "pair", media: [coffeeBrandMedia(coffeeBrandItems[7]), coffeeBrandMedia(coffeeBrandItems[8])], aspect: "4 / 5" },
+    { kind: "pair", media: [coffeeBrandMedia(coffeeBrandItems[9]), coffeeBrandMedia(coffeeBrandItems[10])], aspect: "4 / 5" },
+    { kind: "full", media: coffeeBrandMedia(coffeeBrandItems[11]) },
+    { kind: "pair", media: [coffeeBrandMedia(coffeeBrandItems[12]), coffeeBrandMedia(coffeeBrandItems[13])], aspect: "16 / 9" },
+    { kind: "full", media: coffeeBrandMedia(coffeeBrandItems[14]) },
+  ],
+};
+
+const stargazerItems: PortfolioItem[] = [
+  { id: "stargazer-identity-suite", title: "Identity suite", image: "/stargazer/identity-suite.webp", coverColor: "#10111a", aspect: "4 / 3" },
+  { id: "stargazer-emblem", title: "Celestial emblem", image: "/stargazer/logo-mark.webp", coverColor: "#10111a", aspect: "1 / 1" },
+  { id: "stargazer-shooting", title: "Shooting campaign", image: "/stargazer/shooting-banner.webp", coverColor: "#10111a", aspect: "4 / 3" },
+  { id: "stargazer-clapperboard", title: "Production slate", image: "/stargazer/clapperboard.webp", coverColor: "#10111a", aspect: "3 / 2" },
+  { id: "stargazer-cinema", title: "Cinema screen", image: "/stargazer/cinema-screen.webp", coverColor: "#10111a", aspect: "3 / 2" },
+  { id: "stargazer-sign", title: "Production sign", image: "/stargazer/production-sign.webp", coverColor: "#10111a", aspect: "4 / 5" },
+  { id: "stargazer-billboard", title: "Outdoor campaign", image: "/stargazer/billboard.webp", coverColor: "#10111a", aspect: "3 / 2" },
+  { id: "stargazer-crew-shirt", title: "Crew apparel", image: "/stargazer/crew-shirt.webp", coverColor: "#10111a", aspect: "4 / 3" },
+  { id: "stargazer-crew-cap", title: "Crew cap", image: "/stargazer/crew-cap.webp", coverColor: "#10111a", aspect: "3 / 4" },
+  { id: "stargazer-on-set", title: "On set", image: "/stargazer/camera-shoot.webp", coverColor: "#10111a", aspect: "4 / 3" },
+];
+
+const stargazerMedia = (item: PortfolioItem): BrandMedia => ({ id: item.id, title: item.title, type: "image", src: item.image, bg: item.coverColor, aspect: item.aspect });
+
+const stargazer: Brand = {
+  slug: "stargazer-film-productions", title: "Stargazer Film Productions", category: "Brand Identity", coverColor: "#10111a", coverMark: "✦",
+  heroImage: "/stargazer/shooting-banner.webp", coverImage: "/work-covers/stargazer-cover.webp", href: "/work/brand-identity/stargazer-film-productions", items: stargazerItems,
+  tagline: "A Canadian film production house with its sights set on stories that stay with you.",
+  services: ["Brand Strategy", "Visual Identity", "Film Production", "Campaigns"], year: "2026", washColor: "rgba(37, 43, 77, .5)",
+  blocks: [
+    { kind: "text", heading: "Art Direction", paragraphs: [
+      "The creative brief imagines Stargazer as a Canada-based film production company built around original, considered storytelling. The identity needed to feel at home on set and on screen: confident enough for industry partners, yet open to the possibility and wonder at the heart of filmmaking.",
+      "The emblem brings a filmmaker and telescope beneath a night sky, connecting the focus of the camera with Stargazer's outward-looking name. A restrained celestial palette and formal typography give the mark a timeless, cinematic presence.",
+    ] },
+    { kind: "pair", media: [stargazerMedia(stargazerItems[0]), stargazerMedia(stargazerItems[1])], aspect: "4 / 3" },
+    { kind: "text", heading: "A Mark for the Movies", paragraphs: [
+      "A circular frame holds the illustrated emblem like a lens: a telescope points toward a field of stars, while the filmmaker silhouette keeps the mark grounded in the craft. The full wordmark pairs classic letterforms with clear supporting type for FILM PRODUCTIONS.",
+    ] },
+    { kind: "pair", media: [stargazerMedia(stargazerItems[2]), stargazerMedia(stargazerItems[3])], aspect: "3 / 2" },
+    { kind: "full", media: stargazerMedia(stargazerItems[4]) },
+    { kind: "text", heading: "Colour & Atmosphere", paragraphs: [
+      "Deep charcoal creates a quiet, theatre-like ground. Cosmic indigo and luminous blue bring depth to the illustrated sky, while warm gold lends the wordmark a sense of craft and permanence. The contrast keeps the identity legible across both dark production environments and clean light applications.",
+    ] },
+    { kind: "pair", media: [stargazerMedia(stargazerItems[5]), stargazerMedia(stargazerItems[6])], aspect: "3 / 2" },
+    { kind: "text", heading: "Built for the Production", paragraphs: [
+      "The brief is shaped for a collaborative screen-production studio: a place where writers, directors, performers, crew, and production partners come together to move an idea from development to a finished film. In Canada's varied screen-production landscape, a distinct point of view helps each project find its own audience.",
+      "The identity carries from stationery and pitch materials to crew apparel, location signage, and campaign placements. The emblem stays recognizable at every scale, keeping Stargazer present throughout the work of making a film.",
+    ] },
+    { kind: "pair", media: [stargazerMedia(stargazerItems[7]), stargazerMedia(stargazerItems[8])], aspect: "4 / 3" },
+    { kind: "full", media: stargazerMedia(stargazerItems[9]) },
+  ],
+};
+
+const motionFilmStories = [
+  {
+    media: { id: "motion-skin-spotlight", title: "Skincare visibility campaign", type: "video", src: "/motion-films/skin-spotlight.mp4", poster: "/motion-films/skin-spotlight-poster.jpg", bg: "#17120f", aspect: "9 / 16" },
+    heading: "Visible Lines",
+    paragraph: "A skincare awareness reel built around a close portrait, clear type, and a simple booking invitation. The edit gives the message room to land before the final call to action.",
+  },
+  {
+    media: { id: "motion-iconic-tour", title: "Iconic Living property film", type: "video", src: "/motion-films/iconic-living-tour.mp4", poster: "/motion-films/iconic-living-tour-poster.jpg", bg: "#17191e", aspect: "9 / 16" },
+    heading: "A Place to Arrive",
+    paragraph: "A vertical property tour introduces Iconic Living through its quiet interiors and visitor-facing details, finishing with a clear location and invitation to visit.",
+  },
+  {
+    media: { id: "motion-iconic-materials", title: "Iconic Living material story", type: "video", src: "/motion-films/iconic-living-materials.mp4", poster: "/motion-films/iconic-living-materials-poster.jpg", bg: "#29231e", aspect: "9 / 16" },
+    heading: "Sandstone / Walnut",
+    paragraph: "A residential interiors piece moves from a finished living space to its warm material palette, using room details and colour cards to create an aspirational design story.",
+  },
+  {
+    media: { id: "motion-producer-guide", title: "Five-step guide for new producers", type: "video", src: "/motion-films/producer-guide.mp4", poster: "/motion-films/producer-guide-poster.jpg", bg: "#111419", aspect: "9 / 16" },
+    heading: "Before the First Take",
+    paragraph: "A fast, educational reel for emerging producers turns early production decisions into readable chapters, from planning distribution to casting and getting the film made.",
+  },
+  {
+    media: { id: "motion-skin-treatment", title: "Skincare treatment reel", type: "video", src: "/motion-films/skin-treatment.mp4", poster: "/motion-films/skin-treatment-poster.jpg", bg: "#1a1512", aspect: "9 / 16" },
+    heading: "A Moment to Reset",
+    paragraph: "A treatment-led beauty reel uses close-up care and a short on-screen narrative to present a relaxing facial service, then closes with a direct booking prompt.",
+  },
+  {
+    media: { id: "motion-design-process", title: "Interior design process film", type: "video", src: "/motion-films/design-process.mp4", poster: "/motion-films/design-process-poster.jpg", bg: "#e8e3da", aspect: "9 / 16" },
+    heading: "From Line to Living Room",
+    paragraph: "An interior-design story starts as an architectural sketch and resolves into a completed room, making the transformation from first idea to lived-in space the central reveal.",
+  },
+  {
+    media: { id: "motion-outdoor-living", title: "Outdoor living property film", type: "video", src: "/motion-films/outdoor-living.mp4", poster: "/motion-films/outdoor-living-poster.jpg", bg: "#34382e", aspect: "9 / 16" },
+    heading: "Room to Step Outside",
+    paragraph: "A home-and-garden campaign links the interiors to outdoor entertaining, using a new collection announcement to frame the property as a complete lifestyle.",
+  },
+] satisfies { media: BrandMedia; heading: string; paragraph: string }[];
+
+const filmMotion: Brand = {
+  slug: "film-and-motion", title: "Film & Motion", category: "Film & Motion", coverColor: "#0a0b0f", coverMark: "↗",
+  heroImage: "/motion-films/showreel-mosaic.webp", coverImage: "/work-covers/film-motion-cover.webp", href: "/work/film-and-motion", items: [],
+  tagline: "Short-form films and reels shaped to give every story its own point of view.",
+  services: ["Creative Direction", "Campaign Films", "Social Reels", "Editing"], year: "2026", washColor: "rgba(31, 37, 57, .52)",
+  blocks: [
+    { kind: "text", heading: "Selected Motion", paragraphs: [
+      "Seven short films move between beauty, interiors, property, and filmmaking itself. Each piece starts with the needs of its subject, finding a distinct rhythm and visual language for the story it has to tell.",
+      "The collection brings campaign films and social-first edits together in one place, pairing clear narratives with close detail, considered pacing, and purposeful on-screen type.",
+    ] },
+    { kind: "film-collection", films: motionFilmStories },
+    { kind: "text", heading: "Made to Move", paragraphs: [
+      "From an intimate skincare close-up to a room revealed from its first sketch, these films are designed for the way people watch today: quickly, vertically, and with a strong visual idea at the centre.",
+      "Sound stays off during autoplay. Turn it on for any film to hear its original audio.",
+    ] },
   ],
 };
 
 export const brands: Brand[] = [
   sophia,
-  nteCoffee,
-  createMockBrand({
-    slug: "pixel-roots", title: "Pixel Roots", coverColor: "#cfff4a", coverMark: "⌘", heroImage: "/mock/pixel-hero.svg", prefix: "pixel",
-    itemTitles: ["Brand mark", "Pixel language", "Seed packet", "Market poster", "Packaging family", "Social launch", "Store display", "Field guide"],
-    itemColors: ["#cfff4a", "#397d53", "#f2c95d", "#e98251"], itemAspects: ["16 / 9", "1 / 1", "4 / 5", "16 / 9", "4 / 5", "1 / 1", "16 / 9", "4 / 5"],
-    tagline: "A playful visual system for a growing community of makers, growers, and curious eaters.", services: ["Brand Strategy", "Visual Identity", "Packaging", "Campaigns"], year: "2025", washColor: "rgba(61, 91, 39, .42)",
-    artDirection: ["Pixel Roots brings the energy of a neighborhood growing space into a flexible brand identity. The system celebrates the handmade and the experimental, giving community stories a bright, recognizable frame across markets, packaging, and digital channels.", "A simple graphic mark opens into a lively visual language of modular shapes and bold type. Its structure is deliberately easy to adapt, so each new harvest or event can feel fresh while remaining unmistakably part of the same community."],
-    colorStory: "Electric green leads the palette, balanced by leaf green, sun-warmed yellow, and clay orange drawn from the materials and produce around the project.",
-    creativeProcess: ["We started with the many small moments that make the community feel active: planting, sharing, labeling, and gathering. Those gestures became a toolkit of graphic forms that could scale from a tiny seed packet to a market banner.", "The identity is designed to be used by many hands. Clear templates and a generous colour system make it easy to create new communications while preserving the personality and rhythm of the brand."],
-    imagePairs: [[0, 3], [2, 4], [1, 5]], fullImages: [6, 7],
-  }),
-  createMockBrand({
-    slug: "zenith-studio", title: "Zenith Studio", coverColor: "#a9dcff", coverMark: "✦", heroImage: "/mock/zenith-hero.svg", prefix: "zenith",
-    itemTitles: ["Studio identity", "Signature mark", "Portfolio system", "Print suite", "Exhibition poster", "Studio objects", "Motion language", "Art direction"],
-    itemColors: ["#a9dcff", "#6d70b5", "#f4ede2", "#243049"], itemAspects: ["16 / 9", "1 / 1", "4 / 5", "16 / 9", "4 / 5", "1 / 1", "16 / 9", "4 / 5"],
-    tagline: "A precise and expressive identity for a creative studio working across culture, space, and image.", services: ["Brand Strategy", "Visual Identity", "Print", "Motion"], year: "2025", washColor: "rgba(52, 61, 109, .42)",
-    artDirection: ["Zenith Studio needed an identity that could hold a wide range of creative work without competing with it. The art direction gives the studio a quiet frame: open compositions, precise typography, and a signature mark with enough character to stand alone.", "A cool, spacious palette links the studio’s printed matter and digital portfolio. The system shifts scale and rhythm to suit each project, while a consistent typographic voice keeps the studio present throughout."],
-    colorStory: "Clear sky blue and indigo set the tone, with warm paper and deep ink creating contrast across both expressive and information-heavy layouts.",
-    creativeProcess: ["The identity was built as a working kit rather than a fixed lockup. We tested the signature mark across the studio’s portfolio, print suite, and exhibition materials to establish a set of reliable proportions and spacing rules.", "Motion and object studies extend the same principles into physical and moving forms. The result gives Zenith a coherent presence while allowing the studio’s selected work to remain the focus."],
-    imagePairs: [[0, 3], [2, 4], [1, 5]], fullImages: [6, 7],
-  }),
+  coffeeBrand,
+  stargazer,
 ];
 
-export const socialCollection: PortfolioCollection = {
-  slug: "social-media-posts", title: "Social Media Engagement Posts", category: "Social Media", coverColor: "#f061f5", coverMark: "↗",
-  heroImage: "/mock/social-hero.svg", href: "/work/social-media-posts",
-  items: items("social", ["New season", "A little reminder", "Now open", "Sunday ritual", "Meet the makers", "Limited release", "Big news", "Made for today", "Save the date", "Good things grow", "Your next chapter", "Thank you"], ["#f061f5", "#f1c850", "#82d8bd", "#ed765b", "#8295e8", "#f2e4cf"], ["1 / 1", "4 / 5", "1 / 1", "4 / 5", "1 / 1", "4 / 5", "1 / 1", "4 / 5", "1 / 1", "4 / 5", "1 / 1", "4 / 5"]),
+const socialPostRows = [
+  ["2-days-countdown", "2 days until Black Friday", "Health Globe", "A final-week countdown turns the Black Friday wellness and peel package into a clear, time-sensitive offer. The price, included peel options, and booking contact stay visible for quick decisions.", "https://healthglobe.ca/"],
+  ["4-days-countdown", "4 days until Black Friday", "Health Globe", "This countdown creative introduces the clinic’s wellness and peel offer with a clean price callout and a concise choice between stimulating and restorative peels.", "https://healthglobe.ca/"],
+  ["6-days-wellness-post", "6 days until Black Friday", "Health Globe", "The opening countdown post builds anticipation for a limited wellness package, pairing treatment imagery with a direct value proposition and contact details.", "https://healthglobe.ca/"],
+  ["artboard-1", "We build teams", "DANZ Management Consulting", "A culture-focused recruitment message reframes hiring as team building. The photograph of colleagues celebrating supports the promise of helping organizations find people who work well together.", "https://danzmci.com/about-us/"],
+  ["canadaday-post-copy", "Glow bright this Canada Day", "SkinKouture", "A seasonal greeting connects Canada Day to the brand’s skincare voice with a restrained, premium layout and a polished beauty-led message.", "https://skinkouture.com/"],
+  ["canadaday-post", "Happy Canada Day", "SkinKouture", "A warm Canada Day greeting pairs a celebratory maple-leaf graphic with the clinic’s refined cream and rose palette, keeping the post community-minded and recognizably on-brand.", "https://skinkouture.com/"],
+  ["design-2-copy-2", "Happy Victoria Day", "DANZ Management Consulting", "A Victoria Day greeting adapts the consulting brand for a Canadian holiday, using a quiet maple motif and clear date to keep the message timely and professional.", "https://danzmci.com/about-us/"],
+  ["eden-art-hannah", "Eden Art Gallery feature", "Eden Art Gallery / Hannah Nah", "A portrait-led location feature introduces Hannah Nah in front of the gallery’s distinctive sculpture. The image and contact overlay make this feel like a personal visit or local discovery post.", ""],
+  ["fathers-day-2", "Happy Father’s Day", "Stargazer Media Finance", "A cinematic Father’s Day greeting uses a film still and restrained title treatment to connect a personal celebration with the brand’s screen-media world.", "https://www.stargazermediafinance.com/about/"],
+  ["fathers-day", "Happy Father’s Day", "Stargazer Media Finance", "A second Father’s Day creative brings the same film-inspired tone into a brighter, more graphic composition, balancing the message with a clear date and family imagery.", "https://www.stargazermediafinance.com/about/"],
+  ["lastday-countdownpost", "Last day: Black Friday", "Health Globe", "The closing countdown creates urgency for the wellness package while repeating its treatment choices, price, and clinic contact so the offer remains actionable.", "https://healthglobe.ca/"],
+  ["new-themed", "Holiday Glow Special", "Health Globe", "A seasonal treatment offer presents a paired skincare package and limited-time price. The soft aqua palette and close-up facial image position the promotion around a calm, restorative experience.", "https://healthglobe.ca/"],
+  ["phinney-post-3", "Bank of Canada rate update", "Phinney Real Estate", "A market update translates a central-bank rate change into a quick, high-contrast social graphic. The building image anchors the financial headline in the property market.", "https://phinneyrealestate.com/"],
+  ["post-3", "What our users say", "Teamingway", "A testimonial card turns customer feedback into social proof, highlighting improved team communication and an easy-to-scan five-star review.", "https://teamingway.com/"],
+  ["post-5", "Tasks marked done", "Teamingway", "A product-led post focuses on visible progress: completed tasks, clear ownership, and team-wide visibility. The illustration reinforces the platform’s collaborative workflow message.", "https://teamingway.com/"],
+  ["post-1", "Pay off your mortgage sooner", "Mortgagepedia", "An educational real-estate post introduces practical strategies for paying down a Canadian mortgage sooner, with an approachable couple and a direct question-led headline.", "https://www.mortgagepedia.ca/03-about"],
+  ["post-8", "Haircut guide", "SkinKouture", "A service guide lays out popular haircut options in a simple visual menu, helping salon clients compare styles while keeping the clinic’s established beauty palette and contact details.", "https://skinkouture.com/"],
+] as const;
+
+const socialItems: PortfolioItem[] = socialPostRows.map(([slug, title], index) => ({
+  id: `social-${index + 1}`,
+  title,
+  image: `/social-posts/${slug}.webp`,
+  coverColor: ["#e4f3ef", "#f3e8de", "#151514", "#edf0f2"][index % 4],
+  aspect: index === 7 ? "1 / 1" : "4 / 5",
+}));
+const socialMedia = (item: PortfolioItem): BrandMedia => ({ id: item.id, title: item.title, type: "image", src: item.image, bg: item.coverColor, aspect: item.aspect });
+
+export const socialCollection: Brand = {
+  slug: "social-media-engagement", title: "Social Media Engagement", category: "Social Media", coverColor: "#161816", coverMark: "↗",
+  heroImage: "/social-posts/social-hero.webp", coverImage: "/work-covers/social-cover.webp", href: "/work/social-media-engagement", items: socialItems,
+  tagline: "A collection of real social campaigns, shaped around each brand’s voice, audience, and moment.",
+  services: ["Social Campaigns", "Content Design", "Art Direction", "17 Posts"], year: "2026", washColor: "rgba(73, 105, 88, .42)",
+  blocks: [
+    { kind: "text", heading: "Built for the Feed", paragraphs: [
+      "This collection brings together 17 supplied social posts for wellness and beauty, consulting, real estate, mortgage education, film finance, an art-gallery feature, and a collaboration platform. Each piece uses the visual language of its own brand rather than a single template.",
+      "The short briefs below describe the message and design intent visible in each supplied image. Brand context is drawn from the linked public websites where an official source was identifiable; the captions are portfolio descriptions, not quoted client briefs.",
+    ] },
+    { kind: "social-posts", posts: socialPostRows.map(([slug, , brand, paragraph, href], index) => ({
+      media: socialMedia(socialItems[index]), brand, heading: socialItems[index].title, paragraph,
+      ...(href ? { source: { label: "BRAND CONTEXT ↗", href } } : {}),
+    })) },
+  ],
 };
 
-export const workCards: PortfolioCollection[] = [...brands, socialCollection];
+export const allProjects: Brand[] = [...brands, filmMotion, socialCollection];
+export const workCards: PortfolioCollection[] = allProjects;
 export const brandBySlug = (slug: string) => brands.find((brand) => brand.slug === slug);
+export const projectBySlug = (slug: string) => allProjects.find((project) => project.slug === slug);

@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
-import Showcase from "@/components/showcase";
-import { socialCollection } from "@/lib/portfolio-data";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Social Media Engagement Posts — S&K" };
-
-export default function SocialMediaPage() {
-  return <Showcase cards={[]} detailItems={socialCollection.items} pageTitle={socialCollection.title} backHref="/work" detail />;
+export default function SocialMediaPostsRedirect() {
+  redirect("/work/social-media-engagement");
 }

@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import BrandDetail from "@/components/brand-detail";
-import { brandBySlug, brands } from "@/lib/portfolio-data";
+import { allProjects, brandBySlug, brands } from "@/lib/portfolio-data";
+
+const legacyPaths: Record<string, string> = {
+  "aurora-finance": "/work/brand-identity/me-coffee",
+  "pixel-roots": "/work/brand-identity/stargazer-film-productions",
+  "zenith-studio": "/work/film-and-motion",
+};
 
 export function generateStaticParams() { return brands.map(({ slug }) => ({ slug })); }
 
@@ -13,7 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BrandDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (legacyPaths[slug]) redirect(legacyPaths[slug]);
   const brand = brandBySlug(slug);
   if (!brand) notFound();
-  return <BrandDetail brand={brand} allBrands={brands} />;
+  return <BrandDetail brand={brand} allBrands={allProjects} />;
 }

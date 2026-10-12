@@ -23,6 +23,8 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
   const revealState = useRef(new Map<HTMLElement, gsap.core.Tween[]>());
   const filterTweens = useRef(new Map<HTMLElement, gsap.core.Tween>());
   const suppressClick = useRef(false);
+  const introRunningRef = useRef(false);
+  const introTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const [mode, setMode] = useState<Mode>("vertical");
   const [active, setActive] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -55,6 +57,17 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
     if (!stage || !showcaseCards.length) return;
     const tiles = Array.from(stage.querySelectorAll<HTMLElement>("[data-showcase-tile]"));
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const shouldIntro = !detail && showcaseCards.length > 1 && !reduceMotion;
+    const intro = shouldIntro ? { visible: 0, open: 0, cards: showcaseCards.map(() => ({ progress: 0 })) } : null;
+    let introFinished = false;
+    introRunningRef.current = shouldIntro;
+    if (shouldIntro) {
+      stage.dataset.intro = "running";
+      stage.dataset.introPhase = "empty";
+    } else {
+      delete stage.dataset.intro;
+      delete stage.dataset.introPhase;
+    }
     const position = positionRef.current;
     const modeValue = modeProgress.current;
     let stableActive = Math.round(position.value);
@@ -104,22 +117,109 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         const y = min(yVertical, yHorizontal);
         const measuredWidth = String(Math.round(tileWidth * 100) / 100);
         const measuredHeight = String(Math.round(tileHeight * 100) / 100);
-        if (tile.dataset.layoutWidth !== measuredWidth) { tile.style.width = `${tileWidth}px`; tile.dataset.layoutWidth = measuredWidth; }
-        if (tile.dataset.layoutHeight !== measuredHeight) { tile.style.height = `${tileHeight}px`; tile.dataset.layoutHeight = measuredHeight; }
-        tile.style.transform = `translate3d(${x - tileWidth / 2}px,${y - tileHeight / 2}px,0) scale(${scale})`;
-        tile.style.opacity = String(opacity);
-        tile.style.zIndex = String(1000 - Math.round(distance * 10));
-        tile.style.pointerEvents = distance < showcaseCards.length / 2 ? "auto" : "none";
+        if (intro && !introFinished) {
+          const cardProgress = intro.cards[index].progress;
+          const squareSide = tileWidth * .7;
+          const stackWidth = tileWidth * .5 * (1 - intro.open) + squareSide * intro.open;
+          const stackHeight = tileHeight * .5 * (1 - intro.open) + squareSide * intro.open;
+          const layerOffset = 2 + squareSide * .075 * intro.open;
+          const stackX = width * .5 - index * layerOffset;
+          const stackY = height * .55 - index * layerOffset;
+          const startU = showcaseCards.length === 1 ? .5 : .12 + index / (showcaseCards.length - 1) * .76;
+          const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+          const smooth = (value: number) => { const t = clamp01(value); return t * t * (3 - 2 * t); };
+          const pathPoint = (u: number) => {
+            const t = clamp01(u);
+            const px = width * (.15 + .7 * t);
+            const py = height * (.5 + .1 * (t - .5) + .09 * Math.sin(2 * Math.PI * t));
+            const slope = height * (.1 + .18 * Math.PI * Math.cos(2 * Math.PI * t)) / (width * .7);
+            const angle = Math.max(-14, Math.min(14, Math.atan(slope) * 180 / Math.PI));
+            return { x: px, y: py, angle };
+          };
+          let centerX = stackX;
+          let centerY = stackY;
+          let poseWidth = stackWidth;
+          let poseHeight = stackHeight;
+          let poseScale = 1;
+          let poseOpacity = intro.visible;
+          let rotation = 0;
+          let poseZ = 2000 - index;
+
+          if (cardProgress > 0) {
+            const enter = smooth(cardProgress / .18);
+            const flow = smooth((cardProgress - .18) / .54);
+            const land = smooth((cardProgress - .72) / .28);
+            const start = pathPoint(startU);
+            const end = pathPoint(Math.min(.98, startU + .17));
+            const moving = pathPoint(startU + .17 * flow);
+            const pathX = cardProgress < .18 ? start.x : moving.x;
+            const pathY = cardProgress < .18 ? start.y : moving.y;
+            const pathAngle = cardProgress < .18 ? start.angle : moving.angle;
+
+            centerX = stackX + (pathX - stackX) * enter;
+            centerY = stackY + (pathY - stackY) * enter;
+            rotation = pathAngle * enter;
+            if (cardProgress >= .18 && cardProgress < .72) { centerX = moving.x; centerY = moving.y; rotation = moving.angle; }
+            if (cardProgress >= .72) {
+              centerX = end.x + (x - end.x) * land;
+              centerY = end.y + (y - end.y) * land;
+              rotation = end.angle * (1 - land);
+            }
+            poseWidth = squareSide + (tileWidth - squareSide) * land;
+            poseHeight = squareSide + (tileHeight - squareSide) * land;
+            poseScale = 1 + (scale - 1) * land;
+            poseOpacity = intro.visible * (1 + (opacity - 1) * land);
+            poseZ = Math.round((2000 - index) * (1 - land) + (1000 - Math.round(distance * 10)) * land);
+          }
+
+          const poseMeasuredWidth = String(Math.round(poseWidth * 100) / 100);
+          const poseMeasuredHeight = String(Math.round(poseHeight * 100) / 100);
+          if (tile.dataset.layoutWidth !== poseMeasuredWidth) { tile.style.width = `${poseWidth}px`; tile.dataset.layoutWidth = poseMeasuredWidth; }
+          if (tile.dataset.layoutHeight !== poseMeasuredHeight) { tile.style.height = `${poseHeight}px`; tile.dataset.layoutHeight = poseMeasuredHeight; }
+          tile.style.transform = `translate3d(${centerX - poseWidth / 2}px,${centerY - poseHeight / 2}px,0) rotate(${rotation}deg) scale(${poseScale})`;
+          tile.style.opacity = String(poseOpacity);
+          tile.style.zIndex = String(poseZ);
+          tile.style.visibility = intro.visible > 0 ? "visible" : "hidden";
+          tile.style.pointerEvents = "none";
+        } else {
+          if (tile.dataset.layoutWidth !== measuredWidth) { tile.style.width = `${tileWidth}px`; tile.dataset.layoutWidth = measuredWidth; }
+          if (tile.dataset.layoutHeight !== measuredHeight) { tile.style.height = `${tileHeight}px`; tile.dataset.layoutHeight = measuredHeight; }
+          tile.style.transform = `translate3d(${x - tileWidth / 2}px,${y - tileHeight / 2}px,0) scale(${scale})`;
+          tile.style.opacity = String(opacity);
+          tile.style.zIndex = String(1000 - Math.round(distance * 10));
+          tile.style.visibility = "";
+          tile.style.pointerEvents = distance < showcaseCards.length / 2 ? "auto" : "none";
+        }
       });
 
       const whole = Math.round(position.value);
       if (Math.abs(position.value - stableActive) > .58) stableActive = whole;
       const nextActive = modulo(stableActive, showcaseCards.length);
-      setActive((previous) => previous === nextActive ? previous : nextActive);
+      if (!introRunningRef.current) setActive((previous) => previous === nextActive ? previous : nextActive);
     };
 
     render();
+    if (intro) {
+      const timeline = gsap.timeline({ onUpdate: render, onComplete: () => {
+        introFinished = true;
+        render();
+        introRunningRef.current = false;
+        delete stage.dataset.intro;
+        delete stage.dataset.introPhase;
+        revealTimer.current = setTimeout(() => {
+          const currentActive = modulo(Math.round(position.value), tiles.length);
+          animateReveal(tiles[currentActive], true);
+        }, 150);
+      } });
+      introTimelineRef.current = timeline;
+      timeline.to(intro, { visible: 1, duration: .5, ease: "power3.out" }, .1);
+      timeline.to(intro, { open: 1, duration: .5, ease: "power3.out" }, .6);
+      showcaseCards.forEach((_, index) => {
+        timeline.to(intro.cards[index], { progress: 1, duration: 2 - index * .08, ease: "power2.inOut" }, 1.7 + index * .08);
+      });
+    }
     const settle = () => {
+      if (introRunningRef.current) return;
       if (snapTimer.current) clearTimeout(snapTimer.current);
       snapTimer.current = setTimeout(() => {
         targetRef.current = Math.round(position.value);
@@ -127,6 +227,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       }, 160);
     };
     const moveBy = (amount: number) => {
+      if (introRunningRef.current) return;
       targetRef.current += amount;
       gsap.killTweensOf(position);
       gsap.to(position, { value: targetRef.current, duration: reduceMotion ? .01 : .42, ease: "power2.out", onUpdate: render });
@@ -134,17 +235,24 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
     };
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+      if (introRunningRef.current) return;
       const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
       moveBy(delta / Math.max(180, window.innerHeight * .285) * .86);
     };
     const onKey = (event: KeyboardEvent) => {
+      if (introRunningRef.current) return;
       if (event.target instanceof HTMLElement && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
       const horizontal = modeRef.current === "horizontal";
       if (event.key === "ArrowDown" || event.key === "PageDown" || (horizontal && event.key === "ArrowRight")) { event.preventDefault(); moveBy(1); }
       if (event.key === "ArrowUp" || event.key === "PageUp" || (horizontal && event.key === "ArrowLeft")) { event.preventDefault(); moveBy(-1); }
     };
-    const onPointerDown = (event: PointerEvent) => { pointerStart = { x: event.clientX, y: event.clientY, value: position.value }; dragAxisDistance = 0; };
+    const onPointerDown = (event: PointerEvent) => {
+      if (introRunningRef.current) return;
+      pointerStart = { x: event.clientX, y: event.clientY, value: position.value };
+      dragAxisDistance = 0;
+    };
     const onPointerMove = (event: PointerEvent) => {
+      if (introRunningRef.current) return;
       if (!pointerStart || event.buttons === 0) return;
       const horizontal = modeRef.current === "horizontal";
       const delta = horizontal ? pointerStart.x - event.clientX : pointerStart.y - event.clientY;
@@ -160,6 +268,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       }
     };
     const onPointerUp = () => {
+      if (introRunningRef.current) return;
       if (!pointerStart) return;
       const dragged = dragAxisDistance > 8;
       pointerStart = null;
@@ -181,16 +290,23 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       window.removeEventListener("resize", render);
       if (snapTimer.current) clearTimeout(snapTimer.current);
       if (revealTimer.current) clearTimeout(revealTimer.current);
+      introTimelineRef.current?.kill();
+      introTimelineRef.current = null;
+      introRunningRef.current = false;
+      if (stage.dataset.intro === "running") delete stage.dataset.intro;
+      delete stage.dataset.introPhase;
+      tiles.forEach((tile) => { tile.style.visibility = ""; });
       revealState.current.forEach((tweens) => tweens.forEach((tween) => tween.kill()));
       filterTweens.current.forEach((tween) => tween.kill());
       gsap.killTweensOf(position); gsap.killTweensOf(modeValue);
     };
-  }, [detail, detailItems, pageTitle, showcaseCards]);
+  }, [animateReveal, detail, detailItems, pageTitle, showcaseCards]);
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
     const tiles = stage ? Array.from(stage.querySelectorAll<HTMLElement>("[data-showcase-tile]")) : [];
     if (!tiles.length) return;
+    if (introRunningRef.current) return;
     tiles.forEach((tile) => {
       if (!tile.dataset.revealReady) {
         tile.dataset.revealReady = "true";
@@ -209,6 +325,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
   }, [active, animateReveal]);
 
   const toggleMode = (next: Mode) => {
+    if (introRunningRef.current) return;
     if (next === modeRef.current) return;
     modeRef.current = next;
     setMode(next);
@@ -227,7 +344,10 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
   const activeCard = showcaseCards[active] ?? showcaseCards[0];
 
   return <>
-    <main className={`showcase-shell ${detail ? "is-detail" : ""}`} data-mode={mode} ref={stageRef} onClickCapture={(event) => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); } }}>
+    <main className={`showcase-shell ${detail ? "is-detail" : ""}`} data-mode={mode} data-intro={!detail && showcaseCards.length > 1 ? "running" : undefined} ref={stageRef} onClickCapture={(event) => {
+      if (introRunningRef.current && event.target instanceof HTMLElement && event.target.closest(".showcase-stage, .showcase-label, .showcase-dots, .full-view, .mode-toggle")) { event.preventDefault(); event.stopPropagation(); return; }
+      if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); }
+    }}>
       {activeCard && <div className="showcase-ambient" key={activeCard.image} aria-hidden="true"><img src={activeCard.image} alt="" /></div>}
       {showcaseCards[0] && <link rel="preload" as="image" href={showcaseCards[0].image} />}
       <header className="showcase-header">
@@ -236,7 +356,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       </header>
       {menuOpen && <nav className="menu-panel" aria-label="Site menu"><Link href="/">Home ↗</Link><Link href="/work">Selected work ↗</Link><a href="mailto:hello@produx.studio">Contact ↗</a></nav>}
       <div className="showcase-stage" aria-label={`${pageTitle} showcase`}>
-        {showcaseCards.map((card, index) => <ShowcaseTile key={card.id} card={card} index={index} onSelect={handleTileClick} onItemClick={detail ? selectItem : undefined} />)}
+      {showcaseCards.map((card, index) => <ShowcaseTile key={card.id} card={card} index={index} onSelect={handleTileClick} onItemClick={detail ? selectItem : undefined} />)}
       </div>
       <div className="showcase-label" aria-live="polite" key={`${activeCard?.id}-${mode}`}>
         <span className="label-index">{String(active + 1).padStart(3, "0")}</span>
@@ -244,7 +364,11 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         <span className="label-title">{activeCard?.title}</span>
       </div>
       <Link className="full-view" href="/work"><span>FULL VIEW ↗</span><span>S&K · 2026</span></Link>
-      <div className="showcase-dots" aria-label="Choose a project">{showcaseCards.map((card, index) => <button key={card.id} type="button" aria-label={`Go to ${card.title}`} aria-current={index === active ? "step" : undefined} className={index === active ? "is-active" : ""} onClick={() => { targetRef.current = index + Math.round((positionRef.current.value - index) / showcaseCards.length) * showcaseCards.length; gsap.to(positionRef.current, { value: targetRef.current, duration: .72, ease: "power3.out", onUpdate: () => window.dispatchEvent(new Event("resize")) }); }} />)}</div>
+      <div className="showcase-dots" aria-label="Choose a project">{showcaseCards.map((card, index) => <button key={card.id} type="button" aria-label={`Go to ${card.title}`} aria-current={index === active ? "step" : undefined} className={index === active ? "is-active" : ""} onClick={() => {
+        if (introRunningRef.current) return;
+        targetRef.current = index + Math.round((positionRef.current.value - index) / showcaseCards.length) * showcaseCards.length;
+        gsap.to(positionRef.current, { value: targetRef.current, duration: .72, ease: "power3.out", onUpdate: () => window.dispatchEvent(new Event("resize")) });
+      }} />)}</div>
       <div className="mode-toggle" aria-label="Showcase direction"><button type="button" className={mode === "vertical" ? "is-active" : ""} aria-pressed={mode === "vertical"} onClick={() => toggleMode("vertical")}>VERTICAL</button><span>·</span><button type="button" className={mode === "horizontal" ? "is-active" : ""} aria-pressed={mode === "horizontal"} onClick={() => toggleMode("horizontal")}>HORIZONTAL</button></div>
       <span className="showcase-caption">{detail ? `${showcaseCards.length} PIECES` : "INDEPENDENT CREATIVE STUDIO"}</span>
     </main>

@@ -86,6 +86,30 @@ body { background: var(--bg); color: var(--fg); font-family: "IBM Plex Mono", ui
 @keyframes ambient-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .showcase-ambient { animation: none; } }
 
+/* First-load card deck intro, limited to the non-detail /work showcase. */
+.showcase-shell[data-intro="running"] .showcase-stage { pointer-events: none; }
+.showcase-shell[data-intro="running"] .showcase-tile { visibility: hidden; }
+.showcase-shell[data-intro="running"] .showcase-label,
+.showcase-shell[data-intro="running"] .showcase-dots,
+.showcase-shell[data-intro="running"] .full-view,
+.showcase-shell[data-intro="running"] .mode-toggle,
+.showcase-shell[data-intro="running"] .showcase-caption { opacity: 0; pointer-events: none; }
+.showcase-shell[data-intro="running"] .showcase-label { animation: none; transform: translateY(10px); }
+.showcase-shell[data-intro="running"] .showcase-ambient { opacity: 0; animation: none; }
+.showcase-dots, .full-view, .mode-toggle, .showcase-caption, .showcase-ambient { transition: opacity .34s ease; }
+.showcase-dots { transition-delay: .08s; }
+.full-view { transition-delay: .16s; }
+.mode-toggle { transition-delay: .24s; }
+.showcase-caption { transition-delay: .32s; }
+@media (prefers-reduced-motion: reduce) {
+  .showcase-dots, .full-view, .mode-toggle, .showcase-caption, .showcase-ambient { transition: none !important; }
+  .showcase-shell[data-intro="running"] .showcase-label,
+  .showcase-shell[data-intro="running"] .showcase-dots,
+  .showcase-shell[data-intro="running"] .full-view,
+  .showcase-shell[data-intro="running"] .mode-toggle,
+  .showcase-shell[data-intro="running"] .showcase-caption { opacity: 1; transform: none; animation: none; }
+}
+
 /* Long-form brand identity case studies */
 .brand-page { position: relative; min-height: 100vh; overflow-x: clip; isolation: isolate; color: #f4f4ef; background: radial-gradient(ellipse at 68% 8%, var(--brand-wash), transparent 62%), #0b0b0a; background-attachment: fixed; }
 .brand-page .showcase-header { position: fixed; z-index: 40; }

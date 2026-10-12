@@ -31,9 +31,16 @@ function items(prefix: string, titles: string[], colors: string[], aspects: stri
 
 export const brands: Brand[] = [
   {
-    slug: "nova-labs", title: "Nova Labs", category: "Brand Identity", coverColor: "#ecc41f", coverMark: "✳",
-    heroImage: "/mock/nova-hero.svg", href: "/work/brand-identity/nova-labs",
-    items: items("nova", ["Primary identity", "Logo system", "Business card", "Lab notes", "Packaging", "Launch campaign", "Studio signage", "Digital guidelines"], ["#eac52a", "#6d9aa1", "#f3e6c6", "#222b2a"], ["16 / 9", "1 / 1", "4 / 5", "16 / 9", "4 / 5", "1 / 1", "16 / 9", "4 / 5"]),
+    slug: "sophia", title: "Sophia", category: "Brand Identity", coverColor: "#1c3028", coverMark: "S",
+    heroImage: "/mock/sophia-hero.jpg", href: "/work/brand-identity/sophia",
+    items: [
+      { id: "sophia-identity", title: "Brand identity", image: "/mock/sophia-identity.jpg", coverColor: "#1c3028", aspect: "1 / 1" },
+      { id: "sophia-typography", title: "Typography", image: "/mock/sophia-typography.jpg", coverColor: "#20372c", aspect: "16 / 9" },
+      { id: "sophia-storefront", title: "Storefront", image: "/mock/sophia-storefront.jpg", coverColor: "#9c8662", aspect: "4 / 5" },
+      { id: "sophia-interior", title: "Interior identity", image: "/mock/sophia-interior.jpg", coverColor: "#293329", aspect: "1 / 1" },
+      { id: "sophia-stationery", title: "Stationery", image: "/mock/sophia-stationery.jpg", coverColor: "#435147", aspect: "16 / 9" },
+      { id: "sophia-uniform", title: "Staff uniform", image: "/mock/sophia-uniform.jpg", coverColor: "#26392f", aspect: "4 / 5" },
+    ],
   },
   {
     slug: "aurora-finance", title: "Aurora Finance", category: "Brand Identity", coverColor: "#f25a2a", coverMark: "◒",

@@ -8,7 +8,7 @@ export function generateStaticParams() { return brands.map(({ slug }) => ({ slug
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const brand = brandBySlug(slug);
-  return { title: brand ? `${brand.title} — Produx` : "Project not found — Produx" };
+  return { title: brand ? `${brand.title} — S&K` : "Project not found — S&K" };
 }
 
 export default async function BrandDetailPage({ params }: { params: Promise<{ slug: string }> }) {

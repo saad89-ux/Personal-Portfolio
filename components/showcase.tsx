@@ -73,9 +73,15 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         return widthForCard / ratio;
       };
       const stepVertical = Math.max(...showcaseCards.map(tileHeightFor)) + 10;
-      const stepHorizontal = baseTileWidth * .68;
+      const horizontalSideCount = Math.max(1, Math.min(3, Math.ceil((showcaseCards.length - 1) / 2)));
+      const horizontalSideMargin = Math.max(16, width * .05);
+      const horizontalEdgeScale = .34;
+      const stepHorizontal = Math.min(
+        baseTileWidth * .68,
+        Math.max(0, (width / 2 - horizontalSideMargin - baseTileWidth * horizontalEdgeScale / 2) / horizontalSideCount),
+      );
       const targetYVertical = height * .5;
-      const targetYHorizontal = height * .55;
+      const targetYHorizontal = height * .5;
 
       tiles.forEach((tile, index) => {
         const relative = ((index - position.value + showcaseCards.length / 2) % showcaseCards.length + showcaseCards.length) % showcaseCards.length - showcaseCards.length / 2;
@@ -89,7 +95,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         const tileWidth = Math.min(baseTileWidth, height * (mobile ? .45 : .58) * aspect);
         const tileHeight = tileWidth / aspect;
         const xVertical = (width - tileWidth) / 2;
-        const xHorizontal = width * .05 + relative * stepHorizontal;
+        const xHorizontal = width * .5 + relative * stepHorizontal;
         const yVertical = targetYVertical + relative * stepVertical;
         const yHorizontal = targetYHorizontal;
         const x = min(xVertical + tileWidth / 2, xHorizontal + tileWidth / 2);
@@ -145,7 +151,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       if (dragAxisDistance > 8) {
         suppressClick.current = true;
         gsap.killTweensOf(position);
-        const stride = horizontal ? Math.min(window.innerWidth * .29, 560) * .68 : Math.max(window.innerHeight * .285, window.innerWidth * .29 * 9 / 16 + 10);
+        const stride = horizontal ? stepHorizontal : Math.max(window.innerHeight * .285, window.innerWidth * .29 * 9 / 16 + 10);
         position.value = pointerStart.value + delta / Math.max(180, stride);
         targetRef.current = position.value;
         render();
@@ -220,9 +226,10 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
 
   return <>
     <main className={`showcase-shell ${detail ? "is-detail" : ""}`} data-mode={mode} ref={stageRef} onClickCapture={(event) => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); } }}>
+      {activeCard && <div className="showcase-ambient" key={activeCard.image} aria-hidden="true"><img src={activeCard.image} alt="" /></div>}
       {showcaseCards[0] && <link rel="preload" as="image" href={showcaseCards[0].image} />}
       <header className="showcase-header">
-        <div className="header-left">{backHref ? <Link className="site-wordmark" href="/work">PRØDUX<span>®</span></Link> : <Link className="site-wordmark" href="/">PRØDUX<span>®</span></Link>}{backHref && <Link className="back-to-work" href={backHref}>← ALL WORK</Link>}</div>
+        <div className="header-left">{backHref ? <Link className="site-wordmark" href="/work">S&K</Link> : <Link className="site-wordmark" href="/">S&K</Link>}{backHref && <Link className="back-to-work" href={backHref}>← ALL WORK</Link>}</div>
         <nav className="header-nav" aria-label="Main navigation"><a href="mailto:hello@produx.studio">[ CONTACT ]</a><button type="button" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>[ MENU ]</button></nav>
       </header>
       {menuOpen && <nav className="menu-panel" aria-label="Site menu"><Link href="/">Home ↗</Link><Link href="/work">Selected work ↗</Link><a href="mailto:hello@produx.studio">Contact ↗</a></nav>}
@@ -234,7 +241,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         <span className="label-category">{detail ? pageTitle : activeCard?.category}</span>
         <span className="label-title">{activeCard?.title}</span>
       </div>
-      <Link className="full-view" href="/work"><span>FULL VIEW ↗</span><span>PRØDUX · 2026</span></Link>
+      <Link className="full-view" href="/work"><span>FULL VIEW ↗</span><span>S&K · 2026</span></Link>
       <div className="showcase-dots" aria-label="Choose a project">{showcaseCards.map((card, index) => <button key={card.id} type="button" aria-label={`Go to ${card.title}`} aria-current={index === active ? "step" : undefined} className={index === active ? "is-active" : ""} onClick={() => { targetRef.current = index + Math.round((positionRef.current.value - index) / showcaseCards.length) * showcaseCards.length; gsap.to(positionRef.current, { value: targetRef.current, duration: .72, ease: "power3.out", onUpdate: () => window.dispatchEvent(new Event("resize")) }); }} />)}</div>
       <div className="mode-toggle" aria-label="Showcase direction"><button type="button" className={mode === "vertical" ? "is-active" : ""} aria-pressed={mode === "vertical"} onClick={() => toggleMode("vertical")}>VERTICAL</button><span>·</span><button type="button" className={mode === "horizontal" ? "is-active" : ""} aria-pressed={mode === "horizontal"} onClick={() => toggleMode("horizontal")}>HORIZONTAL</button></div>
       <span className="showcase-caption">{detail ? `${showcaseCards.length} PIECES` : "INDEPENDENT CREATIVE STUDIO"}</span>

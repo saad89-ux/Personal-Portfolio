@@ -1,4 +1,4 @@
-# Produx portfolio
+# S&K portfolio
 
 Next.js App Router portfolio with the scroll driven 7×4 landing page and an infinite, scrollable work showcase.
 

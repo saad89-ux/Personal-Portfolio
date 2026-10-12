@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Showcase from "@/components/showcase";
+import BrandDetail from "@/components/brand-detail";
 import { brandBySlug, brands } from "@/lib/portfolio-data";
 
 export function generateStaticParams() { return brands.map(({ slug }) => ({ slug })); }
@@ -15,5 +15,5 @@ export default async function BrandDetailPage({ params }: { params: Promise<{ sl
   const { slug } = await params;
   const brand = brandBySlug(slug);
   if (!brand) notFound();
-  return <Showcase cards={[]} detailItems={brand.items} pageTitle={brand.title} backHref="/work" detail />;
+  return <BrandDetail brand={brand} allBrands={brands} />;
 }

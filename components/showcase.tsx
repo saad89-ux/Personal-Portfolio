@@ -15,6 +15,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
   const stageRef = useRef<HTMLElement>(null);
   const positionRef = useRef({ value: 0 });
   const modeProgress = useRef({ value: 0 });
+  const horizontalStepRef = useRef(0);
   const modeRef = useRef<Mode>("vertical");
   const targetRef = useRef(0);
   const snapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,6 +81,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         baseTileWidth * .68,
         Math.max(0, (width / 2 - horizontalSideMargin - baseTileWidth * horizontalEdgeScale / 2) / horizontalSideCount),
       );
+      horizontalStepRef.current = stepHorizontal;
       const targetYVertical = height * .5;
       const targetYHorizontal = height * .5;
 
@@ -151,7 +153,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       if (dragAxisDistance > 8) {
         suppressClick.current = true;
         gsap.killTweensOf(position);
-        const stride = horizontal ? stepHorizontal : Math.max(window.innerHeight * .285, window.innerWidth * .29 * 9 / 16 + 10);
+        const stride = horizontal ? horizontalStepRef.current : Math.max(window.innerHeight * .285, window.innerWidth * .29 * 9 / 16 + 10);
         position.value = pointerStart.value + delta / Math.max(180, stride);
         targetRef.current = position.value;
         render();

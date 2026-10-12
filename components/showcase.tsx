@@ -114,7 +114,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
         const xHorizontal = width * .5 + relative * stepHorizontal;
         const yVertical = targetYVertical + relative * stepVertical;
         const yHorizontal = targetYHorizontal;
-        const x = min(xVertical + tileWidth / 2, xHorizontal + tileWidth / 2);
+        const x = min(xVertical + tileWidth / 2, xHorizontal);
         const y = min(yVertical, yHorizontal);
         const measuredWidth = String(Math.round(tileWidth * 100) / 100);
         const measuredHeight = String(Math.round(tileHeight * 100) / 100);
@@ -232,6 +232,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
     };
     const onPointerDown = (event: PointerEvent) => {
       if (introRunningRef.current) return;
+      if (event.pointerType === "touch") stage.setPointerCapture(event.pointerId);
       pointerStart = { x: event.clientX, y: event.clientY, value: position.value };
       dragAxisDistance = 0;
     };
@@ -259,10 +260,16 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       if (dragged) settle();
       window.setTimeout(() => { suppressClick.current = false; }, 80);
     };
+    const onPointerCancel = () => {
+      pointerStart = null;
+      dragAxisDistance = 0;
+      window.setTimeout(() => { suppressClick.current = false; }, 80);
+    };
     stage.addEventListener("wheel", onWheel, { passive: false });
     stage.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerCancel);
     window.addEventListener("keydown", onKey);
     window.addEventListener("resize", render);
     return () => {
@@ -270,6 +277,7 @@ export default function Showcase({ cards, detailItems, pageTitle = "Selected wor
       stage.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerCancel);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", render);
       if (snapTimer.current) clearTimeout(snapTimer.current);

@@ -134,18 +134,52 @@ const sophia: Brand = {
   ],
 };
 
+const nteCoffeeItems: PortfolioItem[] = [
+  { id: "nte-coffee-cards", title: "Loyalty card", image: "/mock/nte-card.jpg", coverColor: "#2b1b12", aspect: "864 / 1236" },
+  { id: "nte-coffee-cups", title: "Takeaway cups", image: "/mock/nte-cups.jpg", coverColor: "#d6c3a4", aspect: "921 / 1152" },
+  { id: "nte-coffee-menu", title: "Cafe menu", image: "/mock/nte-menu.jpg", coverColor: "#e9dfcf", aspect: "864 / 1214" },
+  { id: "nte-coffee-cafe", title: "Coffee house", image: "/mock/nte-cafe.jpg", coverColor: "#4b3020", aspect: "735 / 826" },
+  { id: "nte-coffee-barista", title: "Coffee ritual", image: "/mock/nte-barista.jpg", coverColor: "#39251b", aspect: "880 / 1187" },
+  { id: "nte-coffee-story", title: "Good morning story", image: "/mock/nte-story.jpg", coverColor: "#9a6041", aspect: "768 / 1365" },
+  { id: "nte-coffee-social", title: "Social story", image: "/mock/nte-social.jpg", coverColor: "#593522", aspect: "768 / 1376" },
+  { id: "nte-coffee-machine", title: "Coffee machine", image: "/mock/nte-machine.gif", coverColor: "#28180f", aspect: "1400 / 784" },
+  { id: "nte-coffee-menu-in-use", title: "Menu in use", image: "/mock/nte-menu-in-use.gif", coverColor: "#2b1b12", aspect: "1400 / 864" },
+  { id: "nte-coffee-campaign", title: "Coffee campaign", image: "/mock/nte-campaign.jpg", coverColor: "#362318", aspect: "1 / 1" },
+  { id: "nte-coffee-frontage", title: "Cafe frontage", image: "/mock/nte-hero.jpg", coverColor: "#2b1b12", aspect: "1456 / 734" },
+];
+
+const nteCoffeeMedia = (item: PortfolioItem): BrandMedia => ({ id: item.id, title: item.title, type: "image", src: item.image, bg: item.coverColor, aspect: item.aspect });
+
+const nteCoffee: Brand = {
+  slug: "aurora-finance", title: "Nte Coffee House", category: "Brand Identity", coverColor: "#2b1b12", coverMark: "nte",
+  heroImage: "/mock/nte-hero.jpg", href: "/work/brand-identity/aurora-finance", items: nteCoffeeItems,
+  tagline: "A modern coffee house where refined taste meets contemporary British culture.",
+  services: ["Brand Identity Design", "Packaging Design", "Art Direction"], year: "2026", washColor: "rgba(76, 48, 31, .44)",
+  blocks: [
+    { kind: "text", heading: "Art Direction", paragraphs: [
+      "Nte Coffee House is made for a new generation, bringing refined taste together with modern British culture. Rooted in the ritual of great coffee, it turns an everyday stop into an experience that feels sophisticated, expressive, and quietly premium.",
+      "The identity treats coffee as more than a drink: it is a ritual, a lifestyle, and a moment of connection. Minimal design and warm, considered details create an elevated world that still feels welcoming and easy to belong to.",
+    ] },
+    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[0]), nteCoffeeMedia(nteCoffeeItems[1])], aspect: "4 / 5" },
+    { kind: "text", heading: "Identity", paragraphs: ["A distinctive hand-drawn wordmark leads the system, joined by a playful coffee character and expressive lettering. The combination gives Nte a recognizable voice across loyalty cards, takeaway cups, menus, and the cafe itself."] },
+    { kind: "full", media: nteCoffeeMedia(nteCoffeeItems[2]) },
+    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[3]), nteCoffeeMedia(nteCoffeeItems[4])], aspect: "4 / 5" },
+    { kind: "text", heading: "Colour", paragraphs: ["Soft cream brings warmth and comfort to a deep espresso palette. Together, the tones feel refined and exclusive while keeping the coffee house approachable, carrying the same atmosphere from the first visit to every piece of packaging."] },
+    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[5]), nteCoffeeMedia(nteCoffeeItems[6])], aspect: "9 / 16" },
+    { kind: "text", heading: "Creative Process", paragraphs: [
+      "We built the identity around the small rituals that make a coffee visit memorable: choosing a drink, receiving a cup, and sharing a moment at the counter. A warm palette, expressive type, and illustrated character work together to make these moments feel distinctively Nte.",
+      "The system moves from printed menus and loyalty cards to social storytelling, packaging, and the cafe frontage. Each application keeps the same balance of elevated aesthetics and everyday ease, making the brand feel consistent without losing its personality.",
+    ] },
+    { kind: "full", media: nteCoffeeMedia(nteCoffeeItems[8]) },
+    { kind: "pair", media: [nteCoffeeMedia(nteCoffeeItems[7]), nteCoffeeMedia(nteCoffeeItems[10])], aspect: "16 / 9" },
+    { kind: "video", media: { id: "nte-coffee-film", title: "Nte Coffee House film", type: "video", src: "/mock/video/aurora-finance.mp4", poster: "/mock/nte-hero.jpg", bg: "#2b1b12", aspect: "16 / 9" } },
+    { kind: "full", media: nteCoffeeMedia(nteCoffeeItems[9]) },
+  ],
+};
+
 export const brands: Brand[] = [
   sophia,
-  createMockBrand({
-    slug: "aurora-finance", title: "Aurora Finance", coverColor: "#f25a2a", coverMark: "◒", heroImage: "/mock/aurora-hero.svg", prefix: "aurora",
-    itemTitles: ["Wordmark", "App identity", "Member card", "Annual report", "Campaign", "Editorial system", "Wayfinding", "Product launch"],
-    itemColors: ["#ef633c", "#9f80b9", "#f1d5c1", "#182633"], itemAspects: ["16 / 9", "1 / 1", "4 / 5", "4 / 5", "16 / 9", "1 / 1", "16 / 9", "4 / 5"],
-    tagline: "A clearer, more human identity for a financial platform built around everyday momentum.", services: ["Brand Strategy", "Visual Identity", "Editorial", "Digital Design"], year: "2025", washColor: "rgba(115, 48, 43, .38)",
-    artDirection: ["Aurora Finance reframes financial progress as something people can see and shape in everyday life. Its identity pairs a confident typographic voice with a warm, optimistic visual system that makes complex decisions feel approachable.", "The mark and campaign language are designed to move between product, publication, and public space. Strong geometry gives the system recognition, while a human scale keeps the brand clear and welcoming."],
-    colorStory: "Coral brings energy to deep navy, with soft lilac and warm paper tones creating a useful balance between momentum and reassurance.",
-    creativeProcess: ["We organized the system around a small number of repeatable visual moves: a clear wordmark, editorial hierarchy, and confident blocks of colour. These elements give the platform a consistent voice without limiting the different ways its teams communicate.", "The applications were developed from the interface outward, with campaign and print pieces tested against the same hierarchy. Every touchpoint keeps the information legible while giving the brand room to feel expressive."],
-    imagePairs: [[0, 4], [2, 3], [1, 5]], fullImages: [6, 7],
-  }),
+  nteCoffee,
   createMockBrand({
     slug: "pixel-roots", title: "Pixel Roots", coverColor: "#cfff4a", coverMark: "⌘", heroImage: "/mock/pixel-hero.svg", prefix: "pixel",
     itemTitles: ["Brand mark", "Pixel language", "Seed packet", "Market poster", "Packaging family", "Social launch", "Store display", "Field guide"],
